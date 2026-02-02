@@ -1,96 +1,146 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Luxury Ecommerce Design System - Charcoal/Slate with Gold Accents */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Cream/Warm White Background */
+    --background: 40 30% 96%;
+    --foreground: 220 20% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Cards on cream */
+    --card: 40 25% 98%;
+    --card-foreground: 220 20% 20%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 40 25% 98%;
+    --popover-foreground: 220 20% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Charcoal Primary */
+    --primary: 220 15% 25%;
+    --primary-foreground: 40 30% 96%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Slate Secondary */
+    --secondary: 220 10% 35%;
+    --secondary-foreground: 40 30% 96%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted tones */
+    --muted: 40 10% 90%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Gold Accent */
+    --accent: 43 74% 49%;
+    --accent-foreground: 220 20% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 85% 97%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 40 15% 85%;
+    --input: 40 15% 85%;
+    --ring: 43 74% 49%;
 
-    --radius: 0.5rem;
+    --radius: 0rem;
+
+    /* Custom luxury tokens */
+    --gold: 43 74% 49%;
+    --gold-light: 43 65% 65%;
+    --gold-dark: 43 80% 35%;
+    --charcoal: 220 15% 25%;
+    --charcoal-light: 220 12% 35%;
+    --slate: 220 10% 45%;
+    --cream: 40 30% 96%;
+    --cream-dark: 40 20% 90%;
+
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 49%), hsl(43 65% 60%));
+    --gradient-charcoal: linear-gradient(180deg, hsl(220 15% 25%), hsl(220 15% 18%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 15% 22%) 0%, hsl(220 12% 30%) 100%);
+
+    /* Shadows */
+    --shadow-elegant: 0 4px 20px -4px hsl(220 15% 25% / 0.15);
+    --shadow-product: 0 8px 30px -8px hsl(220 15% 25% / 0.12);
+    --shadow-hover: 0 12px 40px -12px hsl(220 15% 25% / 0.2);
+
+    /* Typography */
+    --font-display: 'Cormorant Garamond', serif;
+    --font-body: 'Inter', sans-serif;
 
     --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 220 20% 20%;
+    --sidebar-primary: 220 15% 25%;
+    --sidebar-primary-foreground: 40 30% 96%;
+    --sidebar-accent: 43 74% 49%;
+    --sidebar-accent-foreground: 220 20% 15%;
+    --sidebar-border: 40 15% 85%;
+    --sidebar-ring: 43 74% 49%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --chart-1: 43 74% 49%;
+    --chart-2: 220 15% 25%;
+    --chart-3: 220 10% 45%;
+    --chart-4: 40 20% 70%;
+    --chart-5: 220 12% 35%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark Charcoal Background */
+    --background: 220 15% 12%;
+    --foreground: 40 20% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 14% 16%;
+    --card-foreground: 40 20% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 14% 18%;
+    --popover-foreground: 40 20% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Cream Primary for dark mode */
+    --primary: 40 25% 92%;
+    --primary-foreground: 220 15% 12%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Gold Secondary */
+    --secondary: 43 74% 49%;
+    --secondary-foreground: 220 15% 12%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 12% 22%;
+    --muted-foreground: 40 15% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Gold Accent */
+    --accent: 43 74% 49%;
+    --accent-foreground: 220 15% 12%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 85% 97%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 12% 22%;
+    --input: 220 12% 22%;
+    --ring: 43 74% 49%;
+
+    /* Custom luxury tokens - dark mode */
+    --gold: 43 74% 49%;
+    --gold-light: 43 65% 60%;
+    --gold-dark: 43 80% 40%;
+    --charcoal: 220 15% 12%;
+    --charcoal-light: 220 12% 20%;
+    --slate: 220 10% 35%;
+    --cream: 40 25% 92%;
+    --cream-dark: 40 15% 80%;
+
+    --sidebar-background: 220 15% 12%;
+    --sidebar-foreground: 40 20% 95%;
+    --sidebar-primary: 40 25% 92%;
+    --sidebar-primary-foreground: 220 15% 12%;
+    --sidebar-accent: 43 74% 49%;
+    --sidebar-accent-foreground: 220 15% 12%;
+    --sidebar-border: 220 12% 22%;
+    --sidebar-ring: 43 74% 49%;
+
+    --chart-1: 43 74% 49%;
+    --chart-2: 40 25% 92%;
+    --chart-3: 220 10% 45%;
+    --chart-4: 43 65% 60%;
+    --chart-5: 220 12% 35%;
   }
 }
 
@@ -100,6 +150,137 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+
+  .text-charcoal {
+    color: hsl(var(--charcoal));
+  }
+
+  .bg-charcoal {
+    background-color: hsl(var(--charcoal));
+  }
+
+  .text-cream {
+    color: hsl(var(--cream));
+  }
+
+  .bg-cream {
+    background-color: hsl(var(--cream));
+  }
+
+  .bg-cream-dark {
+    background-color: hsl(var(--cream-dark));
+  }
+
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  .gradient-charcoal {
+    background: var(--gradient-charcoal);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+
+  .shadow-product {
+    box-shadow: var(--shadow-product);
+  }
+
+  .shadow-hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  .tracking-luxury {
+    letter-spacing: 0.15em;
+  }
+
+  .tracking-wide-luxury {
+    letter-spacing: 0.25em;
+  }
+}
+
+@layer components {
+  .btn-luxury {
+    @apply inline-flex items-center justify-center px-8 py-3 font-body text-sm font-medium tracking-luxury uppercase transition-all duration-300;
+    @apply bg-primary text-primary-foreground border border-primary;
+    @apply hover:bg-transparent hover:text-primary;
+  }
+
+  .btn-luxury-outline {
+    @apply inline-flex items-center justify-center px-8 py-3 font-body text-sm font-medium tracking-luxury uppercase transition-all duration-300;
+    @apply bg-transparent border border-primary text-primary;
+    @apply hover:bg-primary hover:text-primary-foreground;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center px-8 py-3 font-body text-sm font-medium tracking-luxury uppercase transition-all duration-300;
+    @apply bg-gold text-accent-foreground border border-gold;
+    @apply hover:bg-transparent hover:text-gold hover:border-gold;
+  }
+
+  .product-card {
+    @apply relative bg-card overflow-hidden transition-all duration-500;
+  }
+
+  .product-card:hover {
+    box-shadow: var(--shadow-product);
+  }
+
+  .product-card-image {
+    @apply w-full aspect-[3/4] object-cover transition-transform duration-700;
+  }
+
+  .product-card:hover .product-card-image {
+    @apply scale-105;
+  }
+
+  .section-title {
+    @apply font-display text-3xl md:text-4xl font-medium tracking-wide text-center;
+  }
+
+  .nav-link {
+    @apply font-body text-sm font-medium tracking-luxury uppercase transition-colors duration-300;
+    @apply text-foreground/80 hover:text-foreground;
+  }
+
+  .nav-link-light {
+    @apply font-body text-sm font-medium tracking-luxury uppercase transition-colors duration-300;
+    @apply text-cream/80 hover:text-cream;
   }
 }
