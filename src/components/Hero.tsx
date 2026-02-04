@@ -9,7 +9,7 @@ const Hero = () => {
         <img
           src={heroImage}
           alt="Elegant woman in champagne evening gown on marble staircase"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-top"
         />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal/70 via-charcoal/40 to-transparent" />
