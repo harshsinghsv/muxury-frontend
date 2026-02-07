@@ -1,286 +1,194 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, ShoppingBag, Menu, X, User, Heart, LogOut, ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ShoppingCart, Heart, User, Menu, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { products } from "@/data/products";
-
-const navLinks = [
-  { name: "Shop", href: "/shop" },
-  { name: "Collections", href: "/collections" },
-  { name: "About", href: "/about" },
-  { name: "Contact", href: "/contact" },
-];
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { items } = useCart();
+  const { items: wishlistItems } = useWishlist();
 
-  const { cartCount } = useCart();
-  const { user, isAuthenticated, logout } = useAuth();
-  const { wishlistCount } = useWishlist();
-  const navigate = useNavigate();
-
-  const filteredProducts = searchQuery.trim()
-    ? products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
-    ).slice(0, 5)
-    : [];
-
-  const handleSearchSelect = (productId: string) => {
-    setSearchQuery("");
-    setSearchOpen(false);
-    navigate(`/product/${productId}`);
-  };
-
-  const handleLogout = () => {
-    logout();
-    setUserMenuOpen(false);
-    navigate("/");
-  };
+  const cartItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <header className="sticky top-0 z-50 bg-primary">
-      {/* Top bar with gold accent */}
-      <div className="h-1 bg-gold w-full" />
-
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Mobile menu button */}
-          <button
-            className="lg:hidden text-primary-foreground"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-
-          {/* Logo */}
-          <Link to="/" className="flex-shrink-0">
-            <h1 className="font-display text-2xl lg:text-3xl font-semibold tracking-wide-luxury text-primary-foreground">
-              LUXE
+    <header className="bg-[#2C2C2C]">
+      <div className="container mx-auto px-4 lg:px-6">
+        {/* Logo Section - Centered */}
+        <div className="flex justify-center py-8 border-b border-[#C9A961]/30">
+          <Link to="/" className="flex flex-col items-center">
+            <h1
+              className="text-[#C9A961] font-light"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "36px",
+                letterSpacing: "0.2em",
+                lineHeight: "1",
+                fontWeight: 300
+              }}
+            >
+              MUXURY
             </h1>
+            <span
+              className="text-[#C9A961] font-light mt-1"
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.3em",
+                fontWeight: 300
+              }}
+            >
+              CLOTHING
+            </span>
           </Link>
+        </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-10">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                className="nav-link-light"
-              >
-                {link.name}
-              </Link>
-            ))}
+        {/* Navigation Bar */}
+        <div className="flex items-center justify-between py-5">
+          {/* Desktop Navigation - Left aligned */}
+          <nav className="hidden md:flex items-center gap-12 flex-1">
+            <Link
+              to="/shop"
+              className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase"
+              style={{
+                fontSize: "11px",
+                letterSpacing: "0.15em",
+                fontWeight: 400
+              }}
+            >
+              Collections
+            </Link>
+            <Link
+              to="/about"
+              className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase"
+              style={{
+                fontSize: "11px",
+                letterSpacing: "0.15em",
+                fontWeight: 400
+              }}
+            >
+              About
+            </Link>
+            <Link
+              to="/shop"
+              className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase"
+              style={{
+                fontSize: "11px",
+                letterSpacing: "0.15em",
+                fontWeight: 400
+              }}
+            >
+              Atelier
+            </Link>
+            <Link
+              to="/contact"
+              className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase"
+              style={{
+                fontSize: "11px",
+                letterSpacing: "0.15em",
+                fontWeight: 400
+              }}
+            >
+              Contact
+            </Link>
           </nav>
 
-          {/* Right icons */}
-          <div className="flex items-center space-x-4 lg:space-x-6">
-            {/* Search */}
-            <div className="relative">
-              <button
-                className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                aria-label="Search"
-                onClick={() => setSearchOpen(!searchOpen)}
-              >
-                <Search size={20} />
-              </button>
+          {/* Spacer for mobile */}
+          <div className="md:hidden flex-1"></div>
 
-              {/* Search dropdown */}
-              {searchOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-background rounded-lg shadow-xl border border-border overflow-hidden z-50">
-                  <div className="p-2">
-                    <input
-                      type="text"
-                      placeholder="Search products..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-3 py-2 bg-muted rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gold"
-                      autoFocus
-                    />
-                  </div>
-                  {filteredProducts.length > 0 && (
-                    <div className="border-t border-border">
-                      {filteredProducts.map((product) => (
-                        <button
-                          key={product.id}
-                          onClick={() => handleSearchSelect(product.id)}
-                          className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left"
-                        >
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-10 h-10 object-cover rounded"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{product.name}</p>
-                            <p className="text-xs text-muted-foreground">${product.price}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Wishlist */}
+          {/* Right Icons */}
+          <div className="flex items-center gap-3">
+            {/* Wishlist - Desktop only */}
             <Link
               to="/wishlist"
-              className="relative hidden sm:block text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-              aria-label="Wishlist"
+              className="relative p-2 text-[#999999] hover:text-[#C9A961] transition-colors hidden md:block"
             >
-              <Heart size={20} />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-destructive text-destructive-foreground text-xs font-medium flex items-center justify-center rounded-full">
-                  {wishlistCount}
+              <Heart size={18} strokeWidth={1.5} />
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#C9A961] text-[#1A1A1A] text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-semibold">
+                  {wishlistItems.length}
                 </span>
               )}
             </Link>
 
-            {/* User menu */}
-            <div className="relative hidden sm:block">
-              {isAuthenticated ? (
-                <>
-                  <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-1 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                  >
-                    <User size={20} />
-                    <ChevronDown size={14} />
-                  </button>
-
-                  {userMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-background rounded-lg shadow-xl border border-border overflow-hidden z-50">
-                      <div className="p-3 border-b border-border">
-                        <p className="text-sm font-medium">{user?.name}</p>
-                        <p className="text-xs text-muted-foreground">{user?.email}</p>
-                      </div>
-                      <div className="py-1">
-                        <Link
-                          to="/profile"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm hover:bg-muted transition-colors"
-                        >
-                          My Profile
-                        </Link>
-                        <Link
-                          to="/orders"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm hover:bg-muted transition-colors"
-                        >
-                          Order History
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors text-left"
-                        >
-                          <LogOut size={14} />
-                          Sign Out
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Link
-                  to="/login"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                  aria-label="Account"
-                >
-                  <User size={20} />
-                </Link>
-              )}
-            </div>
+            {/* Account - Desktop only */}
+            <Link
+              to="/account"
+              className="p-2 text-[#999999] hover:text-[#C9A961] transition-colors hidden md:block"
+            >
+              <User size={18} strokeWidth={1.5} />
+            </Link>
 
             {/* Cart */}
             <Link
               to="/cart"
-              className="relative text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-              aria-label="Shopping bag"
+              className="relative p-2 text-[#999999] hover:text-[#C9A961] transition-colors"
             >
-              <ShoppingBag size={20} />
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-gold text-charcoal text-xs font-medium flex items-center justify-center rounded-full">
-                {cartCount}
-              </span>
+              <ShoppingCart size={18} strokeWidth={1.5} />
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#C9A961] text-[#1A1A1A] text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-semibold">
+                  {cartItemsCount}
+                </span>
+              )}
             </Link>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-[#999999] hover:text-[#C9A961] transition-colors"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-primary border-t border-primary-foreground/10">
-          <nav className="container mx-auto px-4 py-6 space-y-4">
-            {navLinks.map((link) => (
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden pb-4 border-t border-[#C9A961]/20">
+            <nav className="flex flex-col gap-3 pt-4">
               <Link
-                key={link.name}
-                to={link.href}
-                className="block nav-link-light py-2"
+                to="/shop"
+                className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase py-2"
+                style={{ fontSize: "11px", letterSpacing: "0.15em" }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {link.name}
+                Collections
               </Link>
-            ))}
-            <div className="border-t border-primary-foreground/10 pt-4 mt-4">
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/profile"
-                    className="block nav-link-light py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    My Profile
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="block nav-link-light py-2 text-left w-full"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="block nav-link-light py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="block nav-link-light py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Create Account
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      )}
-
-      {/* Click outside to close dropdowns */}
-      {(searchOpen || userMenuOpen) && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => {
-            setSearchOpen(false);
-            setUserMenuOpen(false);
-          }}
-        />
-      )}
+              <Link
+                to="/about"
+                className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase py-2"
+                style={{ fontSize: "11px", letterSpacing: "0.15em" }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                to="/shop"
+                className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase py-2"
+                style={{ fontSize: "11px", letterSpacing: "0.15em" }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Atelier
+              </Link>
+              <Link
+                to="/contact"
+                className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase py-2"
+                style={{ fontSize: "11px", letterSpacing: "0.15em" }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <Link
+                to="/wishlist"
+                className="text-[#999999] hover:text-[#C9A961] transition-colors uppercase py-2"
+                style={{ fontSize: "11px", letterSpacing: "0.15em" }}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Wishlist ({wishlistItems.length})
+              </Link>
+            </nav>
+          </div>
+        )}
+      </div>
     </header>
   );
 };
