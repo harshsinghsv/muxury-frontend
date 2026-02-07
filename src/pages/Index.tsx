@@ -1,87 +1,110 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import ProductCard from "@/components/ProductCard";
-import Newsletter from "@/components/Newsletter";
-import Footer from "@/components/Footer";
-import { getFeaturedProducts, getNewArrivals, categories } from "@/data/products";
+import QuickViewModal from "@/components/QuickViewModal";
+import { getFeaturedProducts, getNewArrivals, products, Product } from "@/data/products";
+import { ChevronRight } from "lucide-react";
 
-// Category images - using product images as category covers
+// Import available product images for category grid
 import productDress1 from "@/assets/product-dress-1.jpg";
 import productSuit1 from "@/assets/product-suit-1.jpg";
 import productBag from "@/assets/product-bag.jpg";
+import productDress2 from "@/assets/product-dress-2.jpg";
+import productSuit2 from "@/assets/product-suit-2.jpg";
+import productDress3 from "@/assets/product-dress-3.jpg";
 
-const categoryImages: Record<string, string> = {
-  women: productDress1,
-  men: productSuit1,
-  accessories: productBag,
-};
+const categoryProducts = [
+  {
+    id: 1,
+    name: "Luxury Outerwear",
+    image: productSuit2,
+    category: "Outerwear"
+  },
+  {
+    id: 2,
+    name: "Designer Bag",
+    image: productBag,
+    category: "Accessories"
+  },
+  {
+    id: 3,
+    name: "Premium Suit",
+    image: productSuit1,
+    category: "Men's Fashion"
+  },
+  {
+    id: 4,
+    name: "Evening Dress",
+    image: productDress1,
+    category: "Women's Fashion"
+  },
+  {
+    id: 5,
+    name: "Elegant Gown",
+    image: productDress2,
+    category: "Formal Wear"
+  },
+  {
+    id: 6,
+    name: "Designer Dress",
+    image: productDress3,
+    category: "Evening Wear"
+  },
+];
 
 const Index = () => {
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const featuredProducts = getFeaturedProducts();
   const newArrivals = getNewArrivals();
-
-  const displayCategories = categories.filter((c) =>
-    ["women", "men", "accessories"].includes(c.slug)
-  );
+  const saleProducts = products.filter(p => p.originalPrice && p.originalPrice > p.price);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#2C2C2C]">
       <Header />
+
       <main>
+        {/* Hero Section */}
         <Hero />
 
-        {/* Featured Collection */}
-        <section className="py-16 lg:py-24 bg-background">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="text-center mb-12">
-              <p className="font-body text-sm tracking-luxury uppercase text-gold mb-3">
-                Curated Selection
-              </p>
-              <h2 className="section-title text-foreground">Featured Collection</h2>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Category Cards */}
-        <section className="py-16 lg:py-24 bg-cream-dark">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="text-center mb-12">
-              <p className="font-body text-sm tracking-luxury uppercase text-gold mb-3">
-                Browse By
-              </p>
-              <h2 className="section-title text-foreground">Shop Categories</h2>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {displayCategories.map((category) => (
+        {/* Product Category Grid - 2 rows x 3 columns */}
+        <section className="py-20 bg-[#1A1A1A]">
+          <div className="container mx-auto px-4 lg:px-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {categoryProducts.map((product) => (
                 <Link
-                  key={category.id}
-                  to={`/shop?category=${category.slug}`}
-                  className="group relative aspect-[4/5] overflow-hidden rounded-lg"
+                  key={product.id}
+                  to="/shop"
+                  className="group relative overflow-hidden bg-[#0F0F0F]"
+                  style={{
+                    borderRadius: "0px",
+                    aspectRatio: "1/1"
+                  }}
                 >
+                  {/* Product Image */}
                   <img
-                    src={categoryImages[category.slug] || productDress1}
-                    alt={category.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="font-display text-2xl text-cream mb-2">
-                      {category.name}
+
+                  {/* Subtle dark overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  {/* Category name appears on hover at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                    <h3
+                      className="text-white font-light"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        fontSize: "24px",
+                        letterSpacing: "0.02em"
+                      }}
+                    >
+                      {product.category}
                     </h3>
-                    <span className="inline-flex items-center text-sm text-cream/80 group-hover:text-gold transition-colors">
-                      Shop Now
-                      <svg className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </span>
                   </div>
                 </Link>
               ))}
@@ -89,54 +112,173 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Promotional Banner */}
-        <section className="py-20 lg:py-28 bg-primary">
-          <div className="container mx-auto px-4 lg:px-8 text-center">
-            <p className="font-body text-sm tracking-luxury uppercase text-gold mb-4">
-              Limited Time Offer
-            </p>
-            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-medium text-primary-foreground max-w-2xl mx-auto leading-relaxed mb-6">
-              Up to 30% Off New Arrivals
-            </h2>
-            <p className="text-primary-foreground/70 mb-8 max-w-lg mx-auto">
-              Discover the latest collection with exclusive discounts. Use code LUXE30 at checkout.
-            </p>
-            <Link
-              to="/shop"
-              className="inline-flex items-center justify-center px-8 py-3 bg-gold text-charcoal font-medium rounded hover:bg-gold-light transition-colors"
-            >
-              Shop the Sale
-            </Link>
-          </div>
-        </section>
-
-        {/* New Arrivals */}
-        <section className="py-16 lg:py-24 bg-background">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="text-center mb-12">
-              <p className="font-body text-sm tracking-luxury uppercase text-gold mb-3">
-                Just Arrived
-              </p>
-              <h2 className="section-title text-foreground">New Arrivals</h2>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
-              {newArrivals.slice(0, 4).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-
-            <div className="text-center mt-12">
-              <Link to="/shop" className="btn-luxury-outline">
-                View All Products
+        {/* Featured Products Section */}
+        <section className="py-20 bg-[#0F0F0F]">
+          <div className="container mx-auto px-4 lg:px-6">
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <h2
+                  className="font-light mb-3 text-white"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: "48px",
+                    letterSpacing: "0.02em"
+                  }}
+                >
+                  Curated Selection
+                </h2>
+                <div className="bg-[#C9A961]" style={{ width: "80px", height: "2px" }} />
+              </div>
+              <Link
+                to="/shop"
+                className="flex items-center gap-2 text-[#C9A961] hover:text-[#D4AF77] transition-colors font-medium uppercase tracking-wider"
+                style={{ fontSize: "13px" }}
+              >
+                View All <ChevronRight size={16} />
               </Link>
             </div>
+
+            <div
+              className="grid gap-6"
+              style={{
+                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))"
+              }}
+            >
+              {featuredProducts.slice(0, 12).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onQuickView={setQuickViewProduct}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
-        <Newsletter />
+        {/* New Arrivals Section */}
+        <section className="py-20 bg-[#1A1A1A]">
+          <div className="container mx-auto px-4 lg:px-6">
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <h2
+                  className="font-light mb-3 text-white"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: "48px",
+                    letterSpacing: "0.02em"
+                  }}
+                >
+                  New Arrivals
+                </h2>
+                <div className="bg-[#C9A961]" style={{ width: "80px", height: "2px" }} />
+              </div>
+              <Link
+                to="/shop?filter=new"
+                className="flex items-center gap-2 text-[#C9A961] hover:text-[#D4AF77] transition-colors font-medium uppercase tracking-wider"
+                style={{ fontSize: "13px" }}
+              >
+                View All <ChevronRight size={16} />
+              </Link>
+            </div>
+
+            <div
+              className="grid gap-6"
+              style={{
+                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))"
+              }}
+            >
+              {newArrivals.slice(0, 12).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onQuickView={setQuickViewProduct}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Exclusive Offers Section */}
+        <section className="py-20 bg-[#0F0F0F]">
+          <div className="container mx-auto px-4 lg:px-6">
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <h2
+                  className="font-light mb-3 text-white"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: "48px",
+                    letterSpacing: "0.02em"
+                  }}
+                >
+                  Exclusive Offers
+                </h2>
+                <div className="bg-[#C9A961]" style={{ width: "80px", height: "2px" }} />
+              </div>
+              <Link
+                to="/shop?filter=sale"
+                className="flex items-center gap-2 text-[#C9A961] hover:text-[#D4AF77] transition-colors font-medium uppercase tracking-wider"
+                style={{ fontSize: "13px" }}
+              >
+                View All <ChevronRight size={16} />
+              </Link>
+            </div>
+
+            <div
+              className="grid gap-6"
+              style={{
+                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))"
+              }}
+            >
+              {saleProducts.slice(0, 12).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onQuickView={setQuickViewProduct}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Newsletter Section */}
+        <section className="py-20 bg-gradient-to-br from-[#C9A961] to-[#B8975A]">
+          <div className="container mx-auto px-4 lg:px-6 text-center">
+            <h2
+              className="font-light mb-3 text-[#1A1A1A]"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "42px",
+                letterSpacing: "0.02em"
+              }}
+            >
+              Join Our Exclusive Circle
+            </h2>
+            <p className="text-[#1A1A1A]/80 mb-8 text-base">
+              Be the first to discover new collections and exclusive offers
+            </p>
+            <div className="flex flex-col sm:flex-row gap-0 max-w-lg mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email address"
+                className="flex-1 px-6 py-4 bg-white text-[#1A1A1A] focus:outline-none placeholder:text-[#999999]"
+                style={{ borderRadius: "0px" }}
+              />
+              <button className="px-10 py-4 bg-[#1A1A1A] hover:bg-[#2C2C2C] text-white font-semibold uppercase tracking-wider transition-colors text-sm">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </section>
       </main>
+
       <Footer />
+
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+      />
     </div>
   );
 };
