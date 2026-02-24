@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, Truck, AlertCircle } from "lucide-react";
 import { Product } from "@/data/products";
@@ -11,8 +10,7 @@ interface ProductCardProps {
   onQuickView?: (product: Product) => void;
 }
 
-const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
-  const [isHovered, setIsHovered] = useState(false);
+const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
@@ -44,37 +42,23 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
   return (
     <Link
       to={`/product/${product.id}`}
-      className="block bg-bg-elevated transition-all duration-500 group border border-accent-primary/15 hover:border-accent-primary/40"
-      style={{
-        borderRadius: "0px",
-        boxShadow: isHovered ? "var(--shadow-strong)" : "var(--shadow-soft)",
-        transform: isHovered ? "translateY(-6px)" : "translateY(0)",
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="block bg-bg-elevated border border-accent-primary/15 hover:border-accent-primary/40 transition-all duration-300 ease-out will-change-transform hover:-translate-y-1 hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.55)] group"
+      style={{ borderRadius: "0px" }}
     >
-      {/* Image Container - Fixed Height, Dark Background */}
+      {/* Image Container */}
       <div
         className="relative bg-bg-secondary flex items-center justify-center overflow-hidden"
         style={{ height: "320px", width: "100%" }}
       >
-        {/* Product Image - object-fit: contain to prevent cropping */}
+        {/* Product Image */}
         <img
           src={product.images[0]}
           alt={product.name}
-          className="transition-transform duration-700"
-          style={{
-            maxWidth: "90%",
-            maxHeight: "90%",
-            objectFit: "contain",
-            objectPosition: "center",
-            transform: isHovered ? "scale(1.08)" : "scale(1)",
-            filter: isHovered ? "brightness(1.05)" : "brightness(1)"
-          }}
+          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           loading="lazy"
         />
 
-        {/* NEW Badge - Only for new products, top-left */}
+        {/* NEW Badge */}
         {isNew && (
           <div
             className="absolute uppercase font-semibold text-accent-foreground bg-accent-primary"
@@ -85,7 +69,7 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
               padding: "6px 14px",
               borderRadius: "0px",
               zIndex: 10,
-              letterSpacing: "0.08em"
+              letterSpacing: "0.08em",
             }}
           >
             NEW
@@ -95,14 +79,14 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
         {/* Wishlist Heart - Top Right */}
         <button
           onClick={handleWishlistToggle}
-          className="absolute flex items-center justify-center transition-all duration-300 hover:scale-110 bg-bg-elevated/90 backdrop-blur-sm border border-accent-primary/20"
+          className="absolute flex items-center justify-center transition-all duration-200 hover:scale-110 bg-bg-elevated/90 backdrop-blur-sm border border-accent-primary/20"
           style={{
             top: "15px",
             right: "15px",
             width: "36px",
             height: "36px",
             borderRadius: "50%",
-            zIndex: 10
+            zIndex: 10,
           }}
         >
           <Heart
@@ -113,9 +97,7 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
 
         {/* Out of Stock Overlay */}
         {product.stock === 0 && (
-          <div
-            className="absolute inset-0 flex items-center justify-center bg-bg-primary/80"
-          >
+          <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/80">
             <span className="font-medium text-text-secondary" style={{ fontSize: "16px" }}>
               Out of Stock
             </span>
@@ -123,7 +105,7 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
         )}
       </div>
 
-      {/* Card Content - 20px padding for luxury spacing */}
+      {/* Card Content */}
       <div style={{ padding: "20px 16px" }}>
         {/* Category Label */}
         <div
@@ -131,15 +113,15 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
           style={{
             fontSize: "11px",
             letterSpacing: "0.1em",
-            marginBottom: "8px"
+            marginBottom: "8px",
           }}
         >
           {product.category}
         </div>
 
-        {/* Product Title - Elegant serif font */}
+        {/* Product Title */}
         <h3
-          className="line-clamp-2 group-hover:text-accent-primary transition-colors duration-300 text-text-primary"
+          className="line-clamp-2 group-hover:text-accent-primary transition-colors duration-200 text-text-primary"
           style={{
             fontFamily: "'Playfair Display', serif",
             fontSize: "16px",
@@ -147,7 +129,7 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
             lineHeight: "1.4",
             marginBottom: "12px",
             minHeight: "44px",
-            letterSpacing: "0.01em"
+            letterSpacing: "0.01em",
           }}
         >
           {product.name}
@@ -168,13 +150,13 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
           </span>
         </div>
 
-        {/* Price Section - Horizontal Layout */}
+        {/* Price Section */}
         <div className="flex items-baseline flex-wrap" style={{ marginBottom: "12px" }}>
           <span
             className="font-semibold text-text-primary"
             style={{
               fontSize: "20px",
-              fontFamily: "'Inter', sans-serif"
+              fontFamily: "'Inter', sans-serif",
             }}
           >
             ${product.price}
@@ -183,19 +165,13 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
             <>
               <span
                 className="line-through text-text-secondary"
-                style={{
-                  fontSize: "14px",
-                  marginLeft: "8px"
-                }}
+                style={{ fontSize: "14px", marginLeft: "8px" }}
               >
                 ${product.originalPrice}
               </span>
               <span
                 className="font-medium text-accent-primary"
-                style={{
-                  fontSize: "13px",
-                  marginLeft: "8px"
-                }}
+                style={{ fontSize: "13px", marginLeft: "8px" }}
               >
                 {discountPercent}% off
               </span>
@@ -221,11 +197,11 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
           </div>
         )}
 
-        {/* Add to Cart Button - Luxury gold styling */}
+        {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
           disabled={product.stock === 0}
-          className="w-full flex items-center justify-center font-semibold transition-all duration-400 disabled:cursor-not-allowed uppercase"
+          className="w-full flex items-center justify-center font-semibold uppercase transition-all duration-200 disabled:cursor-not-allowed hover:bg-accent-primary hover:text-accent-foreground active:scale-95"
           style={{
             height: "44px",
             backgroundColor: product.stock === 0 ? "hsl(var(--bg-secondary))" : "transparent",
@@ -233,30 +209,10 @@ const ProductCard = ({ product, onQuickView }: ProductCardProps) => {
             fontSize: "13px",
             fontWeight: 600,
             borderRadius: "0px",
-            border: product.stock === 0 ? "1px solid hsl(var(--border-subtle))" : "1.5px solid hsl(var(--accent-primary))",
-            letterSpacing: "0.1em"
-          }}
-          onMouseEnter={(e) => {
-            if (product.stock > 0) {
-              e.currentTarget.style.backgroundColor = "hsl(var(--accent-primary))";
-              e.currentTarget.style.color = "hsl(var(--accent-foreground))";
-              e.currentTarget.style.borderColor = "hsl(var(--accent-primary))";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (product.stock > 0) {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.color = "hsl(var(--accent-primary))";
-              e.currentTarget.style.borderColor = "hsl(var(--accent-primary))";
-            }
-          }}
-          onMouseDown={(e) => {
-            if (product.stock > 0) {
-              e.currentTarget.style.transform = "scale(0.98)";
-            }
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
+            border: product.stock === 0
+              ? "1px solid hsl(var(--border-subtle))"
+              : "1.5px solid hsl(var(--accent-primary))",
+            letterSpacing: "0.1em",
           }}
         >
           <ShoppingCart size={16} style={{ marginRight: "8px" }} />
