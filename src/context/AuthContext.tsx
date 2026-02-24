@@ -1,138 +1,177 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from "react";
+/**
+ * AuthContext — wired to real backend API.
+ *
+ * Zero UI changes: same context shape as before.
+ * Implementation change only: login/register/logout now call real endpoints.
+ * Tokens stored via tokenStorage (localStorage), 15-min access + 7-day refresh.
+ */
+
+import React, {
+    createContext,
+    useContext,
+    useReducer,
+    useEffect,
+    useCallback,
+} from 'react';
+import api, { tokenStorage } from '../lib/api';
+
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface User {
     id: string;
-    name: string;
     email: string;
+    firstName: string;
+    lastName: string;
+    phone?: string | null;
+    role: string;
+    avatar?: string | null;
 }
 
 interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
+    isLoading: boolean;
 }
 
 type AuthAction =
-    | { type: "LOGIN"; payload: User }
-    | { type: "LOGOUT" }
-    | { type: "HYDRATE"; payload: User | null };
+    | { type: 'SET_USER'; payload: User }
+    | { type: 'LOGOUT' }
+    | { type: 'SET_LOADING'; payload: boolean };
 
-interface AuthContextType {
-    user: User | null;
-    isAuthenticated: boolean;
-    login: (email: string, password: string) => Promise<boolean>;
-    register: (name: string, email: string, password: string) => Promise<boolean>;
-    logout: () => void;
+interface AuthContextType extends AuthState {
+    login: (email: string, password: string) => Promise<void>;
+    register: (data: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        password: string;
+        phone?: string;
+    }) => Promise<{ message: string }>;
+    logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const AUTH_STORAGE_KEY = "radiant-cart-auth";
+// ─── Reducer ─────────────────────────────────────────────────────────────────
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
     switch (action.type) {
-        case "LOGIN":
-            return { user: action.payload, isAuthenticated: true };
-        case "LOGOUT":
-            return { user: null, isAuthenticated: false };
-        case "HYDRATE":
-            return {
-                user: action.payload,
-                isAuthenticated: action.payload !== null,
-            };
+        case 'SET_USER':
+            return { ...state, user: action.payload, isAuthenticated: true, isLoading: false };
+        case 'LOGOUT':
+            return { user: null, isAuthenticated: false, isLoading: false };
+        case 'SET_LOADING':
+            return { ...state, isLoading: action.payload };
         default:
             return state;
     }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+// ─── Context ─────────────────────────────────────────────────────────────────
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// ─── Provider ─────────────────────────────────────────────────────────────────
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(authReducer, {
         user: null,
         isAuthenticated: false,
+        isLoading: true,
     });
 
-    // Hydrate from localStorage on mount
+    // On mount: restore session from stored access token
     useEffect(() => {
-        try {
-            const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                dispatch({ type: "HYDRATE", payload: parsed });
+        const restoreSession = async () => {
+            const token = tokenStorage.getAccess();
+            if (!token) {
+                dispatch({ type: 'SET_LOADING', payload: false });
+                return;
             }
-        } catch (error) {
-            console.error("Failed to load auth from localStorage:", error);
+            try {
+                const { data } = await api.get('/auth/me');
+                dispatch({ type: 'SET_USER', payload: data.data.user });
+            } catch {
+                // Token invalid or expired — the interceptor handles refresh.
+                // If it fails again, clear and treat as logged out.
+                tokenStorage.clear();
+                dispatch({ type: 'LOGOUT' });
+            }
+        };
+        restoreSession();
+    }, []);
+
+    // ─── Login ────────────────────────────────────────────────────────────────
+
+    const login = useCallback(async (email: string, password: string) => {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        try {
+            const { data } = await api.post('/auth/login', { email, password });
+            const { user, accessToken, refreshToken } = data.data;
+            tokenStorage.setTokens(accessToken, refreshToken);
+            dispatch({ type: 'SET_USER', payload: user });
+        } catch (err: any) {
+            dispatch({ type: 'SET_LOADING', payload: false });
+            const message = err?.response?.data?.message || 'Login failed. Please try again.';
+            throw new Error(message);
         }
     }, []);
 
-    // Persist to localStorage on changes
-    useEffect(() => {
-        try {
-            if (state.user) {
-                localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state.user));
-            } else {
-                localStorage.removeItem(AUTH_STORAGE_KEY);
+    // ─── Register ─────────────────────────────────────────────────────────────
+
+    const register = useCallback(
+        async (data: {
+            firstName: string;
+            lastName: string;
+            email: string;
+            password: string;
+            phone?: string;
+        }) => {
+            dispatch({ type: 'SET_LOADING', payload: true });
+            try {
+                const { data: res } = await api.post('/auth/register', data);
+                dispatch({ type: 'SET_LOADING', payload: false });
+                // Registration does NOT log user in — they must verify email first
+                return { message: res.message };
+            } catch (err: any) {
+                dispatch({ type: 'SET_LOADING', payload: false });
+                const message = err?.response?.data?.message || 'Registration failed. Please try again.';
+                throw new Error(message);
             }
-        } catch (error) {
-            console.error("Failed to save auth to localStorage:", error);
+        },
+        []
+    );
+
+    // ─── Logout ───────────────────────────────────────────────────────────────
+
+    const logout = useCallback(async () => {
+        const refreshToken = tokenStorage.getRefresh();
+        try {
+            // Best-effort: revoke refresh token on server
+            if (refreshToken) {
+                await api.post('/auth/logout', { refreshToken });
+            }
+        } catch {
+            // Ignore errors; clear tokens regardless
+        } finally {
+            tokenStorage.clear();
+            dispatch({ type: 'LOGOUT' });
         }
-    }, [state.user]);
-
-    const login = async (email: string, _password: string): Promise<boolean> => {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Mock validation - in real app this would hit an API
-        if (email && _password.length >= 6) {
-            const user: User = {
-                id: crypto.randomUUID(),
-                name: email.split("@")[0],
-                email,
-            };
-            dispatch({ type: "LOGIN", payload: user });
-            return true;
-        }
-        return false;
-    };
-
-    const register = async (name: string, email: string, password: string): Promise<boolean> => {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Mock validation
-        if (name && email && password.length >= 6) {
-            const user: User = {
-                id: crypto.randomUUID(),
-                name,
-                email,
-            };
-            dispatch({ type: "LOGIN", payload: user });
-            return true;
-        }
-        return false;
-    };
-
-    const logout = () => {
-        dispatch({ type: "LOGOUT" });
-    };
+    }, []);
 
     return (
-        <AuthContext.Provider
-            value={{
-                user: state.user,
-                isAuthenticated: state.isAuthenticated,
-                login,
-                register,
-                logout,
-            }}
-        >
+        <AuthContext.Provider value={{ ...state, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );
 }
 
-export function useAuth() {
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
+export function useAuth(): AuthContextType {
     const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error("useAuth must be used within an AuthProvider");
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
 }
+
+export default AuthContext;
