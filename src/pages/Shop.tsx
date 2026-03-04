@@ -1,213 +1,155 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { ChevronRight, Grid3x3, List, SlidersHorizontal } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import FilterSidebar from "@/components/shop/FilterSidebar";
+import { useSearchParams } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
 import { products, Product } from "@/data/products";
 
+const CATEGORIES = ["All", "Outerwear", "Accessories", "Men's Fashion", "Women's Fashion"];
+
 const Shop = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [sortBy, setSortBy] = useState("relevance");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(24);
-    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    const category = searchParams.get("category");
-    const filter = searchParams.get("filter");
+    // Active category
+    const categoryQuery = searchParams.get("category");
+    const activeCategory = categoryQuery
+        ? CATEGORIES.find(c => c.toLowerCase() === categoryQuery.toLowerCase()) || "All"
+        : "All";
 
-    // Filter products based on URL params
+    // Apply filters
     let filteredProducts = products;
-    if (category) {
-        filteredProducts = filteredProducts.filter(p => p.category.toLowerCase() === category.toLowerCase());
-    }
-    if (filter === "sale") {
-        filteredProducts = filteredProducts.filter(p => p.originalPrice && p.originalPrice > p.price);
-    }
-    if (filter === "new") {
-        filteredProducts = filteredProducts.filter(p => p.isNew);
+    if (activeCategory !== "All") {
+        filteredProducts = filteredProducts.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
     }
 
-    const totalProducts = filteredProducts.length;
-    const totalPages = Math.ceil(totalProducts / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-    const handleFilterChange = (filters: any) => {
-        console.log("Filters applied:", filters);
-        // Apply filters logic here
+    const handleCategoryClick = (cat: string) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (cat === "All") {
+            newParams.delete("category");
+        } else {
+            newParams.set("category", cat.toLowerCase());
+        }
+        setSearchParams(newParams);
     };
 
     return (
-        <div className="min-h-screen pb-16 md:pb-0 bg-[#1A1A1A]">
-            <Header />
+        <div className="pb-24">
+            {/* Header & Sticky Filter Bar */}
+            <div className="bg-[#FAFAFA] pt-2 pb-3 mb-2 px-5 sticky top-[68px] z-20">
+                {/* Search / Filter Row */}
+                <div className="mb-4">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            className="w-full h-14 px-12 rounded-2xl border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] transition-colors"
+                        />
+                        <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <button
+                            onClick={() => setIsFilterOpen(true)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-[#343434]"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="4" y1="21" x2="4" y2="14"></line>
+                                <line x1="4" y1="10" x2="4" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12" y2="3"></line>
+                                <line x1="20" y1="21" x2="20" y2="16"></line>
+                                <line x1="20" y1="12" x2="20" y2="3"></line>
+                                <line x1="1" y1="14" x2="7" y2="14"></line>
+                                <line x1="9" y1="8" x2="15" y2="8"></line>
+                                <line x1="17" y1="16" x2="23" y2="16"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-            <main className="container mx-auto px-4 lg:px-6 py-6">
-                {/* Breadcrumbs */}
-                <nav className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-                    <Link to="/" className="hover:text-[#FFB700]">Home</Link>
-                    <ChevronRight size={14} />
-                    <Link to="/shop" className="hover:text-[#FFB700]">Shop</Link>
-                    {category && (
-                        <>
-                            <ChevronRight size={14} />
-                            <span className="text-gray-900 font-medium capitalize">{category}</span>
-                        </>
-                    )}
-                </nav>
+                {/* Category Pills */}
+                <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 snap-x">
+                    {CATEGORIES.map((cat) => (
+                        <button
+                            key={cat}
+                            onClick={() => handleCategoryClick(cat)}
+                            className={`snap-start px-5 py-2.5 rounded-full font-['DM_Sans'] text-sm font-medium whitespace-nowrap transition-all ${activeCategory === cat
+                                ? "bg-[#CA8385] text-white"
+                                : "bg-white border border-[#EBEBEB] text-[#343434]"
+                                }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
-                <div className="flex gap-6">
-                    {/* Filter Sidebar - 25% */}
-                    <aside className="hidden lg:block w-1/4 flex-shrink-0">
-                        <FilterSidebar onFilterChange={handleFilterChange} />
-                    </aside>
+            {/* Results Grid */}
+            <main className="px-5">
+                <div className="flex items-center justify-between font-['DM_Sans'] text-xs font-bold tracking-widest uppercase text-[#343434] mb-4">
+                    <h2>Products ({filteredProducts.length})</h2>
+                </div>
 
-                    {/* Main Content - 75% */}
-                    <div className="flex-1">
-                        {/* Results Header */}
-                        <div className="bg-white border border-gray-200 p-4 mb-4">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div>
-                                    <h1 className="text-xl font-bold text-gray-900 mb-1">
-                                        {category ? `${category.charAt(0).toUpperCase() + category.slice(1)} Products` : "All Products"}
-                                    </h1>
-                                    <p className="text-sm text-gray-600">
-                                        Showing {startIndex + 1}-{Math.min(endIndex, totalProducts)} of {totalProducts} results
-                                    </p>
-                                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    {filteredProducts.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
+                </div>
 
-                                <div className="flex items-center gap-4">
-                                    {/* Mobile Filter Button */}
-                                    <button
-                                        onClick={() => setMobileFiltersOpen(true)}
-                                        className="lg:hidden flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50"
-                                    >
-                                        <SlidersHorizontal size={16} />
-                                        Filters
-                                    </button>
+                {filteredProducts.length === 0 && (
+                    <div className="text-center py-20">
+                        <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">No items found</h2>
+                        <p className="font-['DM_Sans'] text-sm text-[#999999] mb-6">Try adjusting your filters.</p>
+                        <button
+                            onClick={() => handleCategoryClick("All")}
+                            className="bg-[#343434] text-white font-['DM_Sans'] text-sm font-medium px-6 py-3 rounded-full"
+                        >
+                            View All Collection
+                        </button>
+                    </div>
+                )}
+            </main>
 
-                                    {/* Sort */}
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm text-gray-600">Sort by:</span>
-                                        <select
-                                            value={sortBy}
-                                            onChange={(e) => setSortBy(e.target.value)}
-                                            className="text-sm border border-gray-300 rounded-sm px-3 py-2 focus:outline-none focus:border-[#FFB700]"
-                                        >
-                                            <option value="relevance">Relevance</option>
-                                            <option value="price-low">Price: Low to High</option>
-                                            <option value="price-high">Price: High to Low</option>
-                                            <option value="newest">Newest First</option>
-                                            <option value="discount">Discount</option>
-                                            <option value="rating">Customer Rating</option>
-                                        </select>
-                                    </div>
-
-                                    {/* View Toggle */}
-                                    <div className="hidden md:flex items-center gap-1 border border-gray-300 rounded-sm">
-                                        <button
-                                            onClick={() => setViewMode("grid")}
-                                            className={`p-2 ${viewMode === "grid" ? "bg-gray-100" : "hover:bg-gray-50"}`}
-                                        >
-                                            <Grid3x3 size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => setViewMode("list")}
-                                            className={`p-2 ${viewMode === "list" ? "bg-gray-100" : "hover:bg-gray-50"}`}
-                                        >
-                                            <List size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+            {/* Filter Bottom Sheet (Muxury strict pattern) */}
+            {isFilterOpen && (
+                <div className="fixed inset-0 z-50">
+                    <div className="absolute inset-0 bg-black/20" onClick={() => setIsFilterOpen(false)} />
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-white rounded-t-3xl p-6 transition-transform">
+                        <div className="w-10 h-1 bg-[#EBEBEB] rounded-full mx-auto mb-4" />
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="font-['Playfair_Display'] text-xl font-medium text-[#343434]">Filter</h2>
+                            <button onClick={() => setIsFilterOpen(false)}>
+                                {/* Filter close empty or × icon */}
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
                         </div>
 
-                        {/* Products Grid */}
-                        <div className={`grid gap-3 mb-6 ${viewMode === "grid"
-                            ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                            : "grid-cols-1"
-                            }`}>
-                            {currentProducts.map((product) => (
-                                <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                    onQuickView={setQuickViewProduct}
-                                />
+                        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">Sort By</p>
+                        {/* Fake sort options for visual */}
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            {['Recommended', 'Newest', 'Lowest Price'].map(opt => (
+                                <button key={opt} className="px-4 py-2 border border-[#EBEBEB] rounded-full font-['DM_Sans'] text-sm text-[#343434]">{opt}</button>
                             ))}
                         </div>
 
-                        {/* Pagination */}
-                        <div className="bg-white border border-gray-200 p-4">
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                                {/* Items per page */}
-                                <div className="flex items-center gap-2 text-sm">
-                                    <span className="text-gray-600">Show:</span>
-                                    <select
-                                        value={itemsPerPage}
-                                        onChange={(e) => {
-                                            setItemsPerPage(parseInt(e.target.value));
-                                            setCurrentPage(1);
-                                        }}
-                                        className="border border-gray-300 rounded-sm px-3 py-1.5 focus:outline-none focus:border-[#FFB700]"
-                                    >
-                                        <option value="24">24</option>
-                                        <option value="48">48</option>
-                                        <option value="96">96</option>
-                                    </select>
-                                    <span className="text-gray-600">per page</span>
-                                </div>
-
-                                {/* Page Numbers */}
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                        disabled={currentPage === 1}
-                                        className="px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Previous
-                                    </button>
-
-                                    <div className="flex items-center gap-1">
-                                        {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                                            const pageNum = i + 1;
-                                            return (
-                                                <button
-                                                    key={pageNum}
-                                                    onClick={() => setCurrentPage(pageNum)}
-                                                    className={`w-10 h-10 rounded-sm text-sm font-medium transition-colors ${currentPage === pageNum
-                                                        ? "bg-[#FFB700] text-gray-900"
-                                                        : "border border-gray-300 hover:bg-gray-50"
-                                                        }`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            );
-                                        })}
-                                        {totalPages > 5 && <span className="px-2">...</span>}
-                                    </div>
-
-                                    <button
-                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                        disabled={currentPage === totalPages}
-                                        className="px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Next
-                                    </button>
-                                </div>
+                        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">Price Range</p>
+                        {/* Fake slider */}
+                        <div className="w-full h-1 bg-[#EBEBEB] rounded-full relative mb-8 mt-4">
+                            <div className="absolute left-1/4 right-1/4 h-full bg-[#CA8385] rounded-full">
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-white border-2 border-[#CA8385] rounded-full shadow-sm" />
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-white border-2 border-[#CA8385] rounded-full shadow-sm" />
                             </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button className="flex-1 h-14 border border-[#343434] rounded-full font-['DM_Sans'] font-medium text-[#343434] active:scale-95 transition-transform" onClick={() => setIsFilterOpen(false)}>Reset</button>
+                            <button className="flex-1 h-14 bg-[#343434] rounded-full font-['DM_Sans'] font-medium text-white active:scale-95 transition-transform" onClick={() => setIsFilterOpen(false)}>Apply</button>
                         </div>
                     </div>
                 </div>
-            </main>
+            )}
 
-            <Footer />
-
-            {/* Quick View Modal */}
             <QuickViewModal
                 product={quickViewProduct}
                 isOpen={!!quickViewProduct}

@@ -1,187 +1,187 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Package, LogOut, Heart } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { User, Mail, Package, Heart, ChevronRight, Settings, MapPin, CreditCard, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { getProductById } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 
-// Mock order data
 const mockOrders = [
-    {
-        id: "ORD-M8K2X9",
-        date: "2024-01-15",
-        status: "Delivered",
-        total: 3420,
-        items: 2,
-    },
-    {
-        id: "ORD-N4P7Q1",
-        date: "2024-01-05",
-        status: "Delivered",
-        total: 980,
-        items: 1,
-    },
-    {
-        id: "ORD-R2S5T8",
-        date: "2023-12-20",
-        status: "Delivered",
-        total: 5340,
-        items: 3,
-    },
+    { id: "ORD-M8K2X9", date: "2024-01-15", status: "Delivered", total: 3420, items: 2 },
+    { id: "ORD-N4P7Q1", date: "2024-01-05", status: "Delivered", total: 980, items: 1 }
 ];
+
+type ViewState = "menu" | "orders" | "wishlist";
 
 const Profile = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const { items: wishlistIds } = useWishlist();
-
-    const wishlistProducts = wishlistIds
-        .map((id) => getProductById(id))
-        .filter(Boolean);
-
-    const handleLogout = () => {
-        logout();
-        navigate("/");
-    };
+    const [view, setView] = useState<ViewState>("menu");
 
     if (!user) {
         navigate("/login");
         return null;
     }
 
+    const wishlistProducts = wishlistIds.map(id => getProductById(id)).filter(Boolean);
+
+    const handleLogout = () => {
+        logout();
+        navigate("/");
+    };
+
+    if (view === "orders") {
+        return (
+            <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-24 z-0">
+                <div className="flex items-center justify-between px-5 pt-8 mb-6">
+                    <button onClick={() => setView("menu")} className="w-10 h-10 border border-[#EBEBEB] rounded-full flex items-center justify-center bg-white active:scale-95 transition-transform">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    </button>
+                    <h1 className="font-['Playfair_Display'] text-xl font-bold text-[#343434]">My Orders</h1>
+                    <div className="w-10"></div>
+                </div>
+                <main className="px-5 space-y-4">
+                    {mockOrders.map(order => (
+                        <div key={order.id} className="bg-white rounded-2xl p-5 border border-[#EBEBEB]">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <p className="font-['Playfair_Display'] text-lg font-bold text-[#343434]">{order.id}</p>
+                                    <p className="font-['DM_Sans'] text-xs text-[#999999]">{new Date(order.date).toLocaleDateString()}</p>
+                                </div>
+                                <span className="font-['DM_Sans'] text-xs font-bold text-[#CA8385] bg-[#FAF8F7] px-3 py-1 rounded-full">{order.status}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-4 border-t border-[#EBEBEB]">
+                                <p className="font-['DM_Sans'] text-sm text-[#999999]">{order.items} Items</p>
+                                <p className="font-['Playfair_Display'] text-lg font-bold text-[#343434]">₹{order.total.toFixed(2)}</p>
+                            </div>
+                        </div>
+                    ))}
+                </main>
+            </div>
+        );
+    }
+
+    if (view === "wishlist") {
+        return (
+            <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-24 z-0">
+                <div className="flex items-center justify-between px-5 pt-8 mb-6">
+                    <button onClick={() => setView("menu")} className="w-10 h-10 border border-[#EBEBEB] rounded-full flex items-center justify-center bg-white active:scale-95 transition-transform">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    </button>
+                    <h1 className="font-['Playfair_Display'] text-xl font-bold text-[#343434]">My Wishlist</h1>
+                    <div className="w-10"></div>
+                </div>
+                <main className="px-5">
+                    {wishlistProducts.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-4">
+                            {wishlistProducts.map(product => <ProductCard key={product!.id} product={product!} />)}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20">
+                            <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">Wishlist is empty</h2>
+                            <p className="font-['DM_Sans'] text-sm text-[#999999]">Save your favorite pieces to view them later.</p>
+                        </div>
+                    )}
+                </main>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-background">
-            <Header />
+        <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-24 z-0">
+            <div className="flex items-center justify-between px-5 pt-8 mb-6">
+                <button onClick={() => navigate(-1)} className="w-10 h-10 border border-[#EBEBEB] rounded-full flex items-center justify-center bg-white active:scale-95 transition-transform">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <h1 className="font-['Playfair_Display'] text-xl font-bold text-[#343434]">Profile</h1>
+                <div className="w-10"></div>
+            </div>
 
-            <main className="container mx-auto px-4 lg:px-8 py-8 lg:py-12">
-                <div className="max-w-5xl mx-auto">
-                    {/* Profile header */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
+            <main className="px-5">
+                <div className="flex flex-col items-center mb-8">
+                    <div className="w-24 h-24 rounded-full bg-[#343434] flex items-center justify-center mb-4">
+                        <span className="font-['Playfair_Display'] text-3xl text-white">
+                            {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                        </span>
+                    </div>
+                    <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434]">{user.firstName} {user.lastName}</h2>
+                    <p className="font-['DM_Sans'] text-sm text-[#999999]">{user.email}</p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-[#EBEBEB] p-2 mb-6">
+                    <button className="w-full flex items-center justify-between p-4 active:bg-[#FAF8F7] transition-colors rounded-xl">
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gold/20 rounded-full flex items-center justify-center">
-                                <User size={28} className="text-gold" />
+                            <div className="w-10 h-10 rounded-full bg-[#FAF8F7] flex items-center justify-center">
+                                <User size={18} className="text-[#343434]" />
                             </div>
-                            <div>
-                                <h1 className="font-display text-2xl font-medium">{user.name}</h1>
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                    <Mail size={14} />
-                                    <span>{user.email}</span>
-                                </div>
-                            </div>
+                            <span className="font-['DM_Sans'] font-medium text-[#343434]">Personal Information</span>
                         </div>
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-2 px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors text-sm"
-                        >
-                            <LogOut size={16} />
-                            Sign Out
-                        </button>
-                    </div>
+                        <ChevronRight size={18} className="text-[#999999]" />
+                    </button>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-3 gap-4 mb-10">
-                        <div className="p-4 border border-border rounded-lg text-center">
-                            <p className="text-2xl font-semibold">{mockOrders.length}</p>
-                            <p className="text-sm text-muted-foreground">Orders</p>
-                        </div>
-                        <div className="p-4 border border-border rounded-lg text-center">
-                            <p className="text-2xl font-semibold">{wishlistIds.length}</p>
-                            <p className="text-sm text-muted-foreground">Wishlist</p>
-                        </div>
-                        <div className="p-4 border border-border rounded-lg text-center">
-                            <p className="text-2xl font-semibold">
-                                ${mockOrders.reduce((sum, o) => sum + o.total, 0).toLocaleString()}
-                            </p>
-                            <p className="text-sm text-muted-foreground">Total Spent</p>
-                        </div>
-                    </div>
-
-                    {/* Order history */}
-                    <section className="mb-12">
-                        <div className="flex items-center gap-2 mb-6">
-                            <Package size={20} className="text-gold" />
-                            <h2 className="font-semibold text-lg">Order History</h2>
-                        </div>
-
-                        {mockOrders.length > 0 ? (
-                            <div className="border border-border rounded-lg overflow-hidden">
-                                <div className="hidden sm:grid grid-cols-5 gap-4 p-4 bg-muted/50 text-sm font-medium">
-                                    <span>Order ID</span>
-                                    <span>Date</span>
-                                    <span>Items</span>
-                                    <span>Status</span>
-                                    <span className="text-right">Total</span>
-                                </div>
-                                {mockOrders.map((order) => (
-                                    <div
-                                        key={order.id}
-                                        className="grid sm:grid-cols-5 gap-2 sm:gap-4 p-4 border-t border-border first:border-0"
-                                    >
-                                        <div>
-                                            <span className="sm:hidden text-xs text-muted-foreground">Order: </span>
-                                            <span className="font-medium text-gold">{order.id}</span>
-                                        </div>
-                                        <div>
-                                            <span className="sm:hidden text-xs text-muted-foreground">Date: </span>
-                                            <span>{new Date(order.date).toLocaleDateString()}</span>
-                                        </div>
-                                        <div>
-                                            <span className="sm:hidden text-xs text-muted-foreground">Items: </span>
-                                            <span>{order.items} item{order.items !== 1 ? "s" : ""}</span>
-                                        </div>
-                                        <div>
-                                            <span className="sm:hidden text-xs text-muted-foreground">Status: </span>
-                                            <span className="inline-flex items-center px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded">
-                                                {order.status}
-                                            </span>
-                                        </div>
-                                        <div className="sm:text-right">
-                                            <span className="sm:hidden text-xs text-muted-foreground">Total: </span>
-                                            <span className="font-medium">${order.total.toLocaleString()}</span>
-                                        </div>
-                                    </div>
-                                ))}
+                    <button onClick={() => setView("orders")} className="w-full flex items-center justify-between p-4 active:bg-[#FAF8F7] transition-colors rounded-xl">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[#FAF8F7] flex items-center justify-center">
+                                <Package size={18} className="text-[#343434]" />
                             </div>
-                        ) : (
-                            <div className="text-center py-8 border border-border rounded-lg">
-                                <Package size={40} className="mx-auto text-muted-foreground/30 mb-3" />
-                                <p className="text-muted-foreground">No orders yet</p>
-                            </div>
-                        )}
-                    </section>
-
-                    {/* Wishlist */}
-                    <section>
-                        <div className="flex items-center gap-2 mb-6">
-                            <Heart size={20} className="text-gold" />
-                            <h2 className="font-semibold text-lg">My Wishlist</h2>
+                            <span className="font-['DM_Sans'] font-medium text-[#343434]">My Orders</span>
                         </div>
+                        <ChevronRight size={18} className="text-[#999999]" />
+                    </button>
 
-                        {wishlistProducts.length > 0 ? (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
-                                {wishlistProducts.map((product) => (
-                                    <ProductCard key={product!.id} product={product!} />
-                                ))}
+                    <button onClick={() => setView("wishlist")} className="w-full flex items-center justify-between p-4 active:bg-[#FAF8F7] transition-colors rounded-xl">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[#FAF8F7] flex items-center justify-center">
+                                <Heart size={18} className="text-[#343434]" />
                             </div>
-                        ) : (
-                            <div className="text-center py-8 border border-border rounded-lg">
-                                <Heart size={40} className="mx-auto text-muted-foreground/30 mb-3" />
-                                <p className="text-muted-foreground mb-4">Your wishlist is empty</p>
-                                <button
-                                    onClick={() => navigate("/shop")}
-                                    className="text-gold hover:underline"
-                                >
-                                    Browse products
-                                </button>
+                            <span className="font-['DM_Sans'] font-medium text-[#343434]">My Wishlist</span>
+                        </div>
+                        <ChevronRight size={18} className="text-[#999999]" />
+                    </button>
+
+                    <button className="w-full flex items-center justify-between p-4 active:bg-[#FAF8F7] transition-colors rounded-xl">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[#FAF8F7] flex items-center justify-center">
+                                <MapPin size={18} className="text-[#343434]" />
                             </div>
-                        )}
-                    </section>
+                            <span className="font-['DM_Sans'] font-medium text-[#343434]">Shipping Address</span>
+                        </div>
+                        <ChevronRight size={18} className="text-[#999999]" />
+                    </button>
+
+                    <button className="w-full flex items-center justify-between p-4 active:bg-[#FAF8F7] transition-colors rounded-xl">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[#FAF8F7] flex items-center justify-center">
+                                <CreditCard size={18} className="text-[#343434]" />
+                            </div>
+                            <span className="font-['DM_Sans'] font-medium text-[#343434]">Payment Methods</span>
+                        </div>
+                        <ChevronRight size={18} className="text-[#999999]" />
+                    </button>
+
+                    <button className="w-full flex items-center justify-between p-4 active:bg-[#FAF8F7] transition-colors rounded-xl">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[#FAF8F7] flex items-center justify-center">
+                                <Settings size={18} className="text-[#343434]" />
+                            </div>
+                            <span className="font-['DM_Sans'] font-medium text-[#343434]">Settings</span>
+                        </div>
+                        <ChevronRight size={18} className="text-[#999999]" />
+                    </button>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-[#EBEBEB] p-2">
+                    <button onClick={handleLogout} className="w-full flex items-center justify-between p-4 active:bg-[#FAF8F7] transition-colors rounded-xl">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[#F5F0EE] flex items-center justify-center">
+                                <LogOut size={18} className="text-[#CA8385]" />
+                            </div>
+                            <span className="font-['DM_Sans'] font-bold text-[#CA8385]">Log Out</span>
+                        </div>
+                    </button>
                 </div>
             </main>
-
-            <Footer />
         </div>
     );
 };

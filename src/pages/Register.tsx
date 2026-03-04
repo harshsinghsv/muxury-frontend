@@ -1,273 +1,113 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
-interface FormData {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-}
-
 const Register = () => {
-    const navigate = useNavigate();
-    const { register, isAuthenticated } = useAuth();
-
-    const [form, setForm] = useState<FormData>({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-    });
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<Partial<FormData>>({});
 
-    // Redirect if already authenticated
-    if (isAuthenticated) {
-        navigate("/", { replace: true });
-        return null;
-    }
+    const navigate = useNavigate();
+    const { register } = useAuth();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
-        if (errors[name as keyof FormData]) {
-            setErrors((prev) => ({ ...prev, [name]: "" }));
-        }
-    };
-
-    const validate = (): boolean => {
-        const newErrors: Partial<FormData> = {};
-
-        if (!form.name.trim()) {
-            newErrors.name = "Name is required";
-        } else if (form.name.trim().length < 2) {
-            newErrors.name = "Name must be at least 2 characters";
-        }
-
-        if (!form.email.trim()) {
-            newErrors.email = "Email is required";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-            newErrors.email = "Invalid email address";
-        }
-
-        if (!form.password) {
-            newErrors.password = "Password is required";
-        } else if (form.password.length < 6) {
-            newErrors.password = "Password must be at least 6 characters";
-        }
-
-        if (!form.confirmPassword) {
-            newErrors.confirmPassword = "Please confirm your password";
-        } else if (form.password !== form.confirmPassword) {
-            newErrors.confirmPassword = "Passwords do not match";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!validate()) return;
+        if (!name || !email || !password) {
+            toast.error("Please fill in all fields");
+            return;
+        }
 
         setLoading(true);
-        const success = await register(form.name, form.email, form.password);
-        setLoading(false);
-
-        if (success) {
-            toast.success("Account created successfully!");
+        try {
+            await register(name, email, password);
             navigate("/");
-        } else {
-            toast.error("Failed to create account. Please try again.");
+        } catch (error) {
+            toast.error("Registration failed");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            <Header />
+        <div className="min-h-screen bg-gradient-to-b from-[#F5F0EE] via-[#FAF8F7] to-white flex flex-col px-5 z-0 pb-10">
+            <button onClick={() => navigate(-1)} className="w-9 h-9 flex items-center justify-center mt-6 mb-8 active:scale-95 transition-transform">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
 
-            <main className="container mx-auto px-4 py-12 lg:py-20">
-                <div className="max-w-md mx-auto">
-                    {/* Header */}
-                    <div className="text-center mb-8">
-                        <h1 className="font-display text-2xl lg:text-3xl font-medium mb-2">
-                            Create Account
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Join us for exclusive access and rewards
-                        </p>
-                    </div>
+            <h1 className="font-['Playfair_Display'] text-3xl font-bold text-[#343434] mb-8">
+                Create Account
+            </h1>
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Name field */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1.5">
-                                Full Name
-                            </label>
-                            <div className="relative">
-                                <User
-                                    size={18}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                />
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    placeholder="John Doe"
-                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-gold ${errors.name ? "border-destructive" : "border-border"
-                                        }`}
-                                />
-                            </div>
-                            {errors.name && (
-                                <p className="text-sm text-destructive mt-1">{errors.name}</p>
-                            )}
-                        </div>
-
-                        {/* Email field */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1.5">
-                                Email Address
-                            </label>
-                            <div className="relative">
-                                <Mail
-                                    size={18}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                />
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={form.email}
-                                    onChange={handleChange}
-                                    placeholder="you@example.com"
-                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-gold ${errors.email ? "border-destructive" : "border-border"
-                                        }`}
-                                />
-                            </div>
-                            {errors.email && (
-                                <p className="text-sm text-destructive mt-1">{errors.email}</p>
-                            )}
-                        </div>
-
-                        {/* Password field */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1.5">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <Lock
-                                    size={18}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                />
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    name="password"
-                                    value={form.password}
-                                    onChange={handleChange}
-                                    placeholder="••••••••"
-                                    className={`w-full pl-10 pr-12 py-2.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-gold ${errors.password ? "border-destructive" : "border-border"
-                                        }`}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                                    aria-label={showPassword ? "Hide password" : "Show password"}
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
-                            </div>
-                            {errors.password && (
-                                <p className="text-sm text-destructive mt-1">{errors.password}</p>
-                            )}
-                        </div>
-
-                        {/* Confirm Password field */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1.5">
-                                Confirm Password
-                            </label>
-                            <div className="relative">
-                                <Lock
-                                    size={18}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                />
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    name="confirmPassword"
-                                    value={form.confirmPassword}
-                                    onChange={handleChange}
-                                    placeholder="••••••••"
-                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-gold ${errors.confirmPassword ? "border-destructive" : "border-border"
-                                        }`}
-                                />
-                            </div>
-                            {errors.confirmPassword && (
-                                <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>
-                            )}
-                        </div>
-
-                        {/* Terms */}
-                        <p className="text-sm text-muted-foreground">
-                            By creating an account, you agree to our{" "}
-                            <button type="button" className="text-gold hover:underline">
-                                Terms of Service
-                            </button>{" "}
-                            and{" "}
-                            <button type="button" className="text-gold hover:underline">
-                                Privacy Policy
-                            </button>
-                            .
-                        </p>
-
-                        {/* Submit button */}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-3 bg-charcoal text-cream font-medium rounded-md hover:bg-charcoal-light transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                            {loading ? (
-                                <>
-                                    <span className="w-5 h-5 border-2 border-cream/30 border-t-cream rounded-full animate-spin" />
-                                    Creating account...
-                                </>
-                            ) : (
-                                "Create Account"
-                            )}
-                        </button>
-                    </form>
-
-                    {/* Divider */}
-                    <div className="relative my-8">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-border" />
-                        </div>
-                        <div className="relative flex justify-center">
-                            <span className="bg-background px-4 text-sm text-muted-foreground">
-                                Already have an account?
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Login link */}
-                    <Link
-                        to="/login"
-                        className="block w-full py-3 border border-border text-center font-medium rounded-md hover:bg-muted transition-colors"
-                    >
-                        Sign In
-                    </Link>
+            <form onSubmit={handleRegister} className="flex-1 flex flex-col">
+                {/* Name field */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium font-['DM_Sans'] text-[#343434] mb-2">Full Name</label>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full h-14 px-4 rounded-2xl border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] transition-colors"
+                        placeholder="John Doe"
+                    />
                 </div>
-            </main>
 
-            <Footer />
+                {/* Email field */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium font-['DM_Sans'] text-[#343434] mb-2">Email</label>
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full h-14 px-4 rounded-2xl border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] transition-colors"
+                        placeholder="example@gmail.com"
+                    />
+                </div>
+
+                {/* Password field */}
+                <div className="mb-8 relative">
+                    <label className="block text-sm font-medium font-['DM_Sans'] text-[#343434] mb-2">Password</label>
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full h-14 px-4 rounded-2xl border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] transition-colors"
+                        placeholder="Enter Your Password"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-[38px] text-[#999999]"
+                    >
+                        {showPassword ? (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        ) : (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        )}
+                    </button>
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-14 bg-[#343434] rounded-full text-white font-['DM_Sans'] font-medium text-base active:scale-95 transition-transform disabled:opacity-70 mt-auto"
+                >
+                    {loading ? "Creating account..." : "Create an account"}
+                </button>
+
+                <p className="text-center text-xs font-['DM_Sans'] text-[#999999] mt-6 leading-relaxed px-4">
+                    By signing up you agree to our <span className="underline font-bold text-[#343434]">Terms</span> and <span className="underline font-bold text-[#343434]">Conditions of Use</span>
+                </p>
+
+                <p className="text-center text-sm font-['DM_Sans'] text-[#999999] mt-6">
+                    Already have an account? <Link to="/login" className="text-[#343434] font-bold">Sign In</Link>
+                </p>
+            </form>
         </div>
     );
 };

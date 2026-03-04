@@ -1,223 +1,57 @@
 import { Link } from "react-router-dom";
-import { Heart, ShoppingCart, Truck, AlertCircle } from "lucide-react";
 import { Product } from "@/data/products";
-import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
-  onQuickView?: (product: Product) => void;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
-
-  const inWishlist = isInWishlist(product.id);
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-  const discountPercent = hasDiscount
-    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
-    : 0;
-  const isLowStock = product.stock <= 5 && product.stock > 0;
-  const isNew = product.isNew;
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const size = product.sizes[0] || "One Size";
-    addToCart(product, 1, size);
-    toast.success("Added to cart");
-  };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     toggleWishlist(product.id);
+    toast.success(isInWishlist(product.id) ? "Removed from saved items" : "Saved item");
   };
 
-  // Generate full stars only
-  const fullStars = Math.round(product.rating);
-  const emptyStars = 5 - fullStars;
-
   return (
-    <Link
-      to={`/product/${product.id}`}
-      className="block bg-bg-elevated border border-accent-primary/15 hover:border-accent-primary/40 transition-all duration-300 ease-out will-change-transform hover:-translate-y-1 hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.55)] group"
-      style={{ borderRadius: "0px" }}
-    >
-      {/* Image Container */}
-      <div
-        className="relative bg-bg-secondary flex items-center justify-center overflow-hidden"
-        style={{ height: "320px", width: "100%" }}
-      >
-        {/* Product Image */}
+    <Link to={`/product/${product.id}`} className="block">
+      <div className="relative rounded-2xl overflow-hidden aspect-[3/4] bg-[#F5F5F5] mb-2">
         <img
           src={product.images[0]}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          className="w-full h-full object-cover"
           loading="lazy"
         />
 
-        {/* NEW Badge */}
-        {isNew && (
-          <div
-            className="absolute uppercase font-semibold text-accent-foreground bg-accent-primary"
-            style={{
-              top: "15px",
-              left: "15px",
-              fontSize: "11px",
-              padding: "6px 14px",
-              borderRadius: "0px",
-              zIndex: 10,
-              letterSpacing: "0.08em",
-            }}
-          >
-            NEW
-          </div>
-        )}
-
-        {/* Wishlist Heart - Top Right */}
+        {/* Heart Icon (Top Right) */}
         <button
           onClick={handleWishlistToggle}
-          className="absolute flex items-center justify-center transition-all duration-200 hover:scale-110 bg-bg-elevated/90 backdrop-blur-sm border border-accent-primary/20"
-          style={{
-            top: "15px",
-            right: "15px",
-            width: "36px",
-            height: "36px",
-            borderRadius: "50%",
-            zIndex: 10,
-          }}
+          className="absolute top-2 right-2 w-7 h-7 bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm active:scale-95 transition-transform"
         >
-          <Heart
-            size={18}
-            className={inWishlist ? "fill-destructive text-destructive" : "text-text-primary"}
-          />
+          {isInWishlist(product.id) ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#CA8385" stroke="#CA8385" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          )}
         </button>
-
-        {/* Out of Stock Overlay */}
-        {product.stock === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/80">
-            <span className="font-medium text-text-secondary" style={{ fontSize: "16px" }}>
-              Out of Stock
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* Card Content */}
-      <div style={{ padding: "20px 16px" }}>
-        {/* Category Label */}
-        <div
-          className="uppercase font-medium text-text-secondary"
-          style={{
-            fontSize: "11px",
-            letterSpacing: "0.1em",
-            marginBottom: "8px",
-          }}
-        >
-          {product.category}
-        </div>
-
-        {/* Product Title */}
-        <h3
-          className="line-clamp-2 group-hover:text-accent-primary transition-colors duration-200 text-text-primary"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: "16px",
-            fontWeight: 400,
-            lineHeight: "1.4",
-            marginBottom: "12px",
-            minHeight: "44px",
-            letterSpacing: "0.01em",
-          }}
-        >
+      {/* Product Details */}
+      <div className="px-1">
+        <h3 className="font-['DM_Sans'] text-sm font-medium text-[#343434] truncate mb-0.5">
           {product.name}
         </h3>
-
-        {/* Rating & Review Count */}
-        <div className="flex items-center" style={{ marginBottom: "12px" }}>
-          <div className="flex items-center" style={{ fontSize: "14px" }}>
-            {[...Array(fullStars)].map((_, i) => (
-              <span key={`full-${i}`} className="text-accent-primary">★</span>
-            ))}
-            {[...Array(emptyStars)].map((_, i) => (
-              <span key={`empty-${i}`} className="text-muted-foreground/40">★</span>
-            ))}
-          </div>
-          <span className="text-text-secondary" style={{ fontSize: "12px", marginLeft: "6px" }}>
-            ({product.reviewsCount})
-          </span>
-        </div>
-
-        {/* Price Section */}
-        <div className="flex items-baseline flex-wrap" style={{ marginBottom: "12px" }}>
-          <span
-            className="font-semibold text-text-primary"
-            style={{
-              fontSize: "20px",
-              fontFamily: "'Inter', sans-serif",
-            }}
-          >
-            ${product.price}
-          </span>
-          {hasDiscount && (
-            <>
-              <span
-                className="line-through text-text-secondary"
-                style={{ fontSize: "14px", marginLeft: "8px" }}
-              >
-                ${product.originalPrice}
-              </span>
-              <span
-                className="font-medium text-accent-primary"
-                style={{ fontSize: "13px", marginLeft: "8px" }}
-              >
-                {discountPercent}% off
-              </span>
-            </>
-          )}
-        </div>
-
-        {/* Delivery Info */}
-        <div className="flex items-center" style={{ marginBottom: "8px" }}>
-          <Truck size={14} className="text-accent-primary" style={{ marginRight: "4px" }} />
-          <span className="text-text-secondary" style={{ fontSize: "12px" }}>
-            Free Delivery
-          </span>
-        </div>
-
-        {/* Low Stock Warning */}
-        {isLowStock && (
-          <div className="flex items-center" style={{ marginBottom: "12px" }}>
-            <AlertCircle size={12} className="text-destructive" style={{ marginRight: "4px" }} />
-            <span className="text-destructive font-medium" style={{ fontSize: "12px" }}>
-              Only {product.stock} left in stock
-            </span>
-          </div>
-        )}
-
-        {/* Add to Cart Button */}
-        <button
-          onClick={handleAddToCart}
-          disabled={product.stock === 0}
-          className="w-full flex items-center justify-center font-semibold uppercase transition-all duration-200 disabled:cursor-not-allowed hover:bg-accent-primary hover:text-accent-foreground active:scale-95"
-          style={{
-            height: "44px",
-            backgroundColor: product.stock === 0 ? "hsl(var(--bg-secondary))" : "transparent",
-            color: product.stock === 0 ? "hsl(var(--text-secondary))" : "hsl(var(--accent-primary))",
-            fontSize: "13px",
-            fontWeight: 600,
-            borderRadius: "0px",
-            border: product.stock === 0
-              ? "1px solid hsl(var(--border-subtle))"
-              : "1.5px solid hsl(var(--accent-primary))",
-            letterSpacing: "0.1em",
-          }}
-        >
-          <ShoppingCart size={16} style={{ marginRight: "8px" }} />
-          {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-        </button>
+        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434]">
+          ₹{product.price.toFixed(2)}
+        </p>
       </div>
     </Link>
   );
