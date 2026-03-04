@@ -47,65 +47,23 @@ export default {
 					DEFAULT: "hsl(var(--card))",
 					foreground: "hsl(var(--card-foreground))",
 				},
-				// New Semantic Tokens
-				"bg-primary": "hsl(var(--bg-primary))",
-				"bg-secondary": "hsl(var(--bg-secondary))",
-				"bg-elevated": "hsl(var(--bg-elevated))",
-				"text-primary": "hsl(var(--text-primary))",
-				"text-secondary": "hsl(var(--text-secondary))",
-				"accent-primary": "hsl(var(--accent-primary))",
-				"accent-muted": "hsl(var(--accent-muted))",
-				sidebar: {
-					DEFAULT: "hsl(var(--sidebar-background))",
-					foreground: "hsl(var(--sidebar-foreground))",
-					primary: "hsl(var(--sidebar-primary))",
-					"primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-					accent: "hsl(var(--sidebar-accent))",
-					"accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-					border: "hsl(var(--sidebar-border))",
-					ring: "hsl(var(--sidebar-ring))",
-				},
+				// Muxury Design System Tokens
+				"bg-warm": "#FAFAFA",
+				"uxury-pink": "#CA8385",
+				"uxury-dark": "#343434",
+				"uxury-neutral": "#F5F5F5",
+				"uxury-border": "#EBEBEB",
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
-			},
-			keyframes: {
-				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
-				},
-				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				}
-			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			},
-			boxShadow: {
-				'2xs': 'var(--shadow-2xs)',
-				xs: 'var(--shadow-xs)',
-				sm: 'var(--shadow-sm)',
-				md: 'var(--shadow-md)',
-				lg: 'var(--shadow-lg)',
-				xl: 'var(--shadow-xl)',
-				'2xl': 'var(--shadow-2xl)'
+				sm: 'calc(var(--radius) - 4px)',
+				"2xl": "1rem",
+				"3xl": "1.5rem",
 			},
 			fontFamily: {
 				sans: [
 					'DM Sans',
-					'ui-sans-serif',
 					'system-ui',
 					'-apple-system',
 					'BlinkMacSystemFont',
@@ -113,30 +71,34 @@ export default {
 					'Roboto',
 					'Helvetica Neue',
 					'Arial',
-					'Noto Sans',
 					'sans-serif'
 				],
 				serif: [
-					'Crimson Pro',
-					'ui-serif',
+					'Playfair Display',
 					'Georgia',
-					'Cambria',
 					'Times New Roman',
-					'Times',
 					'serif'
 				],
-				mono: [
-					'SF Mono',
-					'ui-monospace',
-					'SFMono-Regular',
-					'Menlo',
-					'Monaco',
-					'Consolas',
-					'Liberation Mono',
-					'Courier New',
-					'monospace'
-				]
-			}
+			},
+			keyframes: {
+				"accordion-down": {
+					from: { height: "0" },
+					to: { height: "var(--radix-accordion-content-height)" },
+				},
+				"accordion-up": {
+					from: { height: "var(--radix-accordion-content-height)" },
+					to: { height: "0" },
+				},
+				"fadeIn": {
+					from: { opacity: "0" },
+					to: { opacity: "1" },
+				}
+			},
+			animation: {
+				"accordion-down": "accordion-down 0.2s ease-out",
+				"accordion-up": "accordion-up 0.2s ease-out",
+				"fadeIn": "fadeIn 0.2s ease"
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
