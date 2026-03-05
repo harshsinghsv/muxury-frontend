@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProductById } from "@/data/products";
+import { useProduct } from "@/hooks/useProducts";
 import { useCart } from "@/context/CartContext";
 import StatusBar from "@/components/StatusBar";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const ProductDetails = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const product = getProductById(id || "");
+    const { data: product, isLoading, error } = useProduct(id || "");
     const { addToCart } = useCart();
 
     const [selectedSize, setSelectedSize] = useState<string>("");
@@ -21,7 +22,28 @@ const ProductDetails = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    if (!product) return null;
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-[#FAFAFA] flex justify-center items-center">
+                <Loader2 className="w-8 h-8 text-[#CA8385] animate-spin" />
+            </div>
+        );
+    }
+
+    if (error || !product) {
+        return (
+            <div className="min-h-screen bg-[#FAFAFA] flex flex-col justify-center items-center pb-20">
+                <h1 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-2">Product Not Found</h1>
+                <p className="font-['DM_Sans'] text-[#999999] mb-6">This item may be out of stock or removed.</p>
+                <button
+                    onClick={() => navigate("/shop")}
+                    className="bg-[#343434] text-white px-6 py-3 rounded-full font-['DM_Sans'] text-sm hover:bg-black transition-colors"
+                >
+                    Back to Shop
+                </button>
+            </div>
+        );
+    }
 
     const needsSizeSelection = product.sizes.length > 0 && product.sizes[0] !== "One Size";
     const colors = ['#C8A882', '#4A4E5A', '#343434', '#FFFFFF'];

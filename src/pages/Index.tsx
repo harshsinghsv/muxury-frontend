@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
-import { getFeaturedProducts } from "@/data/products";
+import { useProducts } from "@/hooks/useProducts";
+import { Loader2 } from "lucide-react";
 
 // Using existing image as a proxy for the promo image
 import productBag from "@/assets/product-bag.jpg";
 
 const Index = () => {
-  const featuredProducts = getFeaturedProducts().slice(0, 4);
+  const { data: productsData, isLoading, error } = useProducts({ isFeatured: true });
+  const featuredProducts = (productsData || []).slice(0, 4);
 
   return (
     <div className="px-5 md:px-12 lg:px-24 xl:px-32 pt-2 pb-6">
@@ -39,11 +41,19 @@ const Index = () => {
       </div>
 
       {/* 2-col product grid (mobile) -> 3-col (md) -> 4-col (lg) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-        {featuredProducts.map(product => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-10">
+          <Loader2 className="w-6 h-6 text-[#CA8385] animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-10 text-red-500">Failed to load popular items.</div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+          {featuredProducts.map(product => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

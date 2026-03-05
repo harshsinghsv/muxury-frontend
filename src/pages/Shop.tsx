@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
-import { products, Product } from "@/data/products";
+import { useProducts } from "@/hooks/useProducts";
+import { Product } from "@/data/products";
+import { Loader2 } from "lucide-react";
 
-const CATEGORIES = ["All", "Outerwear", "Accessories", "Men's Fashion", "Women's Fashion"];
+const CATEGORIES = ["All", "Outerwear", "Accessories", "Men's Fashion", "Women's Fashion", "Dresses", "Suits"];
 
 const Shop = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -17,11 +19,11 @@ const Shop = () => {
         ? CATEGORIES.find(c => c.toLowerCase() === categoryQuery.toLowerCase()) || "All"
         : "All";
 
-    // Apply filters
-    let filteredProducts = products;
-    if (activeCategory !== "All") {
-        filteredProducts = filteredProducts.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
-    }
+    const { data: productsData, isLoading, error } = useProducts({
+        category: categoryQuery !== "All" && categoryQuery ? categoryQuery : undefined
+    });
+
+    const filteredProducts = productsData || [];
 
     const handleCategoryClick = (cat: string) => {
         const newParams = new URLSearchParams(searchParams);
@@ -142,11 +144,19 @@ const Shop = () => {
                         <h2>{activeCategory === "All" ? "All Products" : activeCategory} ({filteredProducts.length})</h2>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-                        {filteredProducts.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
+                    {isLoading ? (
+                        <div className="flex justify-center items-center py-20">
+                            <Loader2 className="w-8 h-8 text-[#CA8385] animate-spin" />
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-20 text-red-500">Failed to load products. Please try again.</div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+                            {filteredProducts.map((product) => (
+                                <ProductCard key={product.id} product={product} />
+                            ))}
+                        </div>
+                    )}
 
                     {filteredProducts.length === 0 && (
                         <div className="text-center py-20 bg-white md:bg-transparent rounded-3xl md:border md:border-[#EBEBEB] mt-8">

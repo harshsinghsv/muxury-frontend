@@ -10,18 +10,97 @@ const Checkout = () => {
     const [orderComplete, setOrderComplete] = useState(false);
     const [orderId, setOrderId] = useState("");
 
+    const loadRazorpay = () => new Promise((resolve) => {
+        if ((window as any).Razorpay) return resolve(true);
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        try {
+            const api = (await import('@/lib/api')).default;
+            const { toast } = await import('sonner');
 
-        const newOrderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
-        setOrderId(newOrderId);
-        clearCart();
-        setOrderComplete(true);
-        setLoading(false);
+            const isLoaded = await loadRazorpay();
+            if (!isLoaded) {
+                toast.error("Failed to load payment portal. Are you online?");
+                setLoading(false);
+                return;
+            }
+
+            // 1. Sync cart to backend temporarily
+            await api.delete('/cart/clear').catch(() => null);
+            for (const item of items) {
+                await api.post('/cart/items', { productId: item.product.id, quantity: item.quantity });
+            }
+
+            // 2. Create Order
+            const orderPayload = {
+                shippingAddress: {
+                    fullName: "Jhones Cortal",
+                    street: "1901 Thornridge Cir.",
+                    city: "Shiloh",
+                    state: "MH",
+                    postalCode: "81063",
+                    country: "India",
+                    phone: "5551234567"
+                },
+                paymentMethod: "RAZORPAY",
+                notes: ""
+            };
+
+            const orderRes = await api.post('/orders', orderPayload);
+            const createdOrderId = orderRes.data.data.order.id;
+            const createdOrderNumber = orderRes.data.data.order.orderNumber;
+
+            // 3. Initiate Razorpay Payment
+            const rpRes = await api.post('/payment/create-order', { orderId: createdOrderId });
+            const { razorpayOrderId, amount, currency, key, orderNumber } = rpRes.data.data;
+
+            const options = {
+                key,
+                amount,
+                currency,
+                name: "Muxury",
+                description: `Order ${orderNumber}`,
+                order_id: razorpayOrderId,
+                handler: async (response: any) => {
+                    try {
+                        await api.post('/payment/verify', {
+                            razorpayOrderId: response.razorpay_order_id,
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpaySignature: response.razorpay_signature,
+                            orderId: createdOrderId
+                        });
+                        setOrderId(createdOrderNumber);
+                        clearCart();
+                        setOrderComplete(true);
+                        toast.success("Payment successful!");
+                    } catch (err: any) {
+                        toast.error(err.response?.data?.message || "Payment verification failed.");
+                    }
+                },
+                theme: { color: "#343434" }
+            };
+
+            const rzp = new (window as any).Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+                toast.error(response.error.description || "Payment failed");
+            });
+            rzp.open();
+
+        } catch (error: any) {
+            const { toast } = await import('sonner');
+            toast.error(error.response?.data?.message || "Checkout failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (items.length === 0 && !orderComplete) {

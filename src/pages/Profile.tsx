@@ -6,10 +6,8 @@ import { useWishlist } from "@/context/WishlistContext";
 import { getProductById } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 
-const mockOrders = [
-    { id: "ORD-M8K2X9", date: "2024-01-15", status: "Delivered", total: 3420, items: 2 },
-    { id: "ORD-N4P7Q1", date: "2024-01-05", status: "Delivered", total: 980, items: 1 }
-];
+import { useOrders, OrderSummary } from "@/hooks/useOrders";
+import { Loader2 } from "lucide-react";
 
 type ViewState = "menu" | "orders" | "wishlist";
 
@@ -52,35 +50,44 @@ const Profile = () => {
         { id: 'settings', icon: Settings, label: 'Settings' },
     ];
 
+    const { data: realOrders, isLoading: ordersLoading } = useOrders();
+    const ordersList = realOrders || [];
+
     // Main content area renderer
     const renderContent = () => {
         if (view === "orders" || (window.innerWidth >= 768 && view === "menu")) {
             return (
                 <div className="w-full">
                     {window.innerWidth >= 768 && <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-6">My Orders</h2>}
-                    <div className="space-y-4">
-                        {mockOrders.length > 0 ? mockOrders.map(order => (
-                            <div key={order.id} className="bg-white rounded-2xl p-5 md:p-6 border border-[#EBEBEB] shadow-sm">
-                                <div className="flex justify-between items-start mb-4 md:mb-6">
-                                    <div>
-                                        <p className="font-['Playfair_Display'] text-lg md:text-xl font-bold text-[#343434] mb-1">{order.id}</p>
-                                        <p className="font-['DM_Sans'] text-xs md:text-sm text-[#999999]">Placed on {new Date(order.date).toLocaleDateString()}</p>
+                    {ordersLoading ? (
+                        <div className="flex justify-center py-20">
+                            <Loader2 className="w-8 h-8 text-[#CA8385] animate-spin" />
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {ordersList.length > 0 ? ordersList.map((order: OrderSummary) => (
+                                <div key={order.id} className="bg-white rounded-2xl p-5 md:p-6 border border-[#EBEBEB] shadow-sm">
+                                    <div className="flex justify-between items-start mb-4 md:mb-6">
+                                        <div>
+                                            <p className="font-['Playfair_Display'] text-lg md:text-xl font-bold text-[#343434] mb-1">{order.id}</p>
+                                            <p className="font-['DM_Sans'] text-xs md:text-sm text-[#999999]">Placed on {new Date(order.date).toLocaleDateString()}</p>
+                                        </div>
+                                        <span className="font-['DM_Sans'] text-xs md:text-sm font-bold text-[#CA8385] bg-[#FAF8F7] px-3 md:px-4 py-1.5 rounded-full">{order.status}</span>
                                     </div>
-                                    <span className="font-['DM_Sans'] text-xs md:text-sm font-bold text-[#CA8385] bg-[#FAF8F7] px-3 md:px-4 py-1.5 rounded-full">{order.status}</span>
+                                    <div className="flex justify-between items-center pt-4 md:pt-6 border-t border-[#EBEBEB]">
+                                        <p className="font-['DM_Sans'] text-sm md:text-base text-[#999999]">{order.items} {order.items === 1 ? 'Item' : 'Items'}</p>
+                                        <p className="font-['Playfair_Display'] text-lg md:text-2xl font-bold text-[#343434]">₹{order.total.toFixed(2)}</p>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between items-center pt-4 md:pt-6 border-t border-[#EBEBEB]">
-                                    <p className="font-['DM_Sans'] text-sm md:text-base text-[#999999]">{order.items} {order.items === 1 ? 'Item' : 'Items'}</p>
-                                    <p className="font-['Playfair_Display'] text-lg md:text-2xl font-bold text-[#343434]">₹{order.total.toFixed(2)}</p>
+                            )) : (
+                                <div className="text-center py-20 bg-white border border-[#EBEBEB] rounded-2xl">
+                                    <Package size={48} className="mx-auto text-[#EBEBEB] mb-4" />
+                                    <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">No orders yet</h3>
+                                    <p className="font-['DM_Sans'] text-[#999999] text-sm">When you place an order, it will appear here.</p>
                                 </div>
-                            </div>
-                        )) : (
-                            <div className="text-center py-20 bg-white border border-[#EBEBEB] rounded-2xl">
-                                <Package size={48} className="mx-auto text-[#EBEBEB] mb-4" />
-                                <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">No orders yet</h3>
-                                <p className="font-['DM_Sans'] text-[#999999] text-sm">When you place an order, it will appear here.</p>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             );
         }
