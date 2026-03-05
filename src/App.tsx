@@ -41,7 +41,7 @@ const App = () => (
           <RecentlyViewedProvider>
             <TooltipProvider>
               <BrowserRouter>
-                <div className="max-w-[390px] mx-auto min-h-screen bg-[#FAFAFA] flex flex-col relative overflow-x-hidden shadow-2xl">
+                <div className="w-full max-w-[390px] md:max-w-none mx-auto min-h-screen bg-[#FAFAFA] flex flex-col relative overflow-x-hidden shadow-2xl md:shadow-none">
                   <Toaster />
                   <Sonner />
 

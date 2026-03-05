@@ -17,7 +17,7 @@ export default function StatusBar() {
     }, []);
 
     return (
-        <div className="flex items-center justify-between px-6 pt-3 pb-1 h-11 bg-transparent shrink-0">
+        <div className="flex items-center justify-between px-6 pt-3 pb-1 h-11 bg-transparent shrink-0 md:hidden">
             <span className="text-[13px] font-semibold font-['DM_Sans'] text-[#343434]">{time}</span>
             <div className="flex items-center gap-1.5 text-[#343434]">
                 {/* Signal SVG */}

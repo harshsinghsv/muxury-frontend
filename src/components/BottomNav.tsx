@@ -76,7 +76,7 @@ export default function BottomNav() {
     if (!showNav) return null;
 
     return (
-        <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-white border-t border-[#EBEBEB] flex items-center justify-around px-4 py-3 pb-6 z-40">
+        <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] md:hidden bg-white border-t border-[#EBEBEB] flex items-center justify-around px-4 py-3 pb-6 z-40">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
