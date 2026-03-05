@@ -64,7 +64,7 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
                 onClick={() => toggleSection(section)}
                 className="flex items-center justify-between w-full text-left group"
             >
-                <h3 
+                <h3
                     className="font-light text-sm text-white uppercase tracking-widest group-hover:text-[#C9A961] transition-colors"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                 >
@@ -87,7 +87,7 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
                     <SlidersHorizontal size={18} className="text-[#C9A961]" />
-                    <h2 
+                    <h2
                         className="font-light text-lg text-white"
                         style={{ fontFamily: "'Playfair Display', serif", letterSpacing: "0.02em" }}
                     >
@@ -111,8 +111,8 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
                             className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#C9A961]/10 border border-[#C9A961]/30 text-[#C9A961] text-xs"
                         >
                             {filter}
-                            <button 
-                                onClick={() => { }} 
+                            <button
+                                onClick={() => { }}
                                 className="hover:text-white transition-colors"
                             >
                                 <X size={12} />
@@ -156,9 +156,9 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
                         className="w-full accent-[#C9A961] bg-transparent"
                     />
                     <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#C9A961] font-medium">${selectedFilters.priceRange[0]}</span>
+                        <span className="text-[#C9A961] font-medium">₹{selectedFilters.priceRange[0]}</span>
                         <span className="text-gray-500">—</span>
-                        <span className="text-[#C9A961] font-medium">${selectedFilters.priceRange[1]}</span>
+                        <span className="text-[#C9A961] font-medium">₹{selectedFilters.priceRange[1]}</span>
                     </div>
                     <div className="pt-2">
                         <div className="flex gap-2">
@@ -205,11 +205,10 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
                         <button
                             key={size}
                             onClick={() => handleCheckboxChange("sizes", size)}
-                            className={`px-4 py-2 border text-sm font-medium transition-all duration-300 ${
-                                selectedFilters.sizes.includes(size)
+                            className={`px-4 py-2 border text-sm font-medium transition-all duration-300 ${selectedFilters.sizes.includes(size)
                                     ? "border-[#C9A961] bg-[#C9A961] text-[#0F0F0F]"
                                     : "border-white/20 text-gray-400 hover:border-[#C9A961] hover:text-white"
-                            }`}
+                                }`}
                         >
                             {size}
                         </button>
@@ -231,11 +230,10 @@ const FilterSidebar = ({ onFilterChange }: FilterSidebarProps) => {
                         <button
                             key={color.name}
                             onClick={() => handleCheckboxChange("colors", color.name)}
-                            className={`w-9 h-9 transition-all duration-300 ${
-                                selectedFilters.colors.includes(color.name)
+                            className={`w-9 h-9 transition-all duration-300 ${selectedFilters.colors.includes(color.name)
                                     ? "ring-2 ring-[#C9A961] ring-offset-2 ring-offset-[#0F0F0F] scale-110"
                                     : "hover:scale-110"
-                            }`}
+                                }`}
                             style={{ backgroundColor: color.hex }}
                             title={color.name}
                         />

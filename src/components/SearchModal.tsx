@@ -151,10 +151,10 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                                                     <p className="text-sm text-muted-foreground">{product.category}</p>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="font-semibold">${product.price.toLocaleString()}</p>
+                                                    <p className="font-semibold">₹{product.price.toLocaleString()}</p>
                                                     {product.originalPrice && (
                                                         <p className="text-sm text-muted-foreground line-through">
-                                                            ${product.originalPrice.toLocaleString()}
+                                                            ₹{product.originalPrice.toLocaleString()}
                                                         </p>
                                                     )}
                                                 </div>

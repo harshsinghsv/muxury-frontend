@@ -98,11 +98,11 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                         {/* Price */}
                         <div className="flex items-center gap-3 mb-6">
                             <span className="text-2xl font-semibold">
-                                ${product.price.toLocaleString()}
+                                ₹{product.price.toLocaleString()}
                             </span>
                             {product.originalPrice && (
                                 <span className="text-lg text-muted-foreground line-through">
-                                    ${product.originalPrice.toLocaleString()}
+                                    ₹{product.originalPrice.toLocaleString()}
                                 </span>
                             )}
                         </div>
@@ -117,8 +117,8 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                                             key={size}
                                             onClick={() => setSelectedSize(size)}
                                             className={`px-4 py-2 border rounded-md text-sm font-medium transition-all ${selectedSize === size
-                                                    ? "border-gold bg-gold/10 text-gold"
-                                                    : "border-border hover:border-gold/50"
+                                                ? "border-gold bg-gold/10 text-gold"
+                                                : "border-border hover:border-gold/50"
                                                 }`}
                                         >
                                             {size}
@@ -168,8 +168,8 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                             <button
                                 onClick={handleWishlistToggle}
                                 className={`p-3 border rounded-md transition-colors ${inWishlist
-                                        ? "border-gold bg-gold/10 text-gold"
-                                        : "border-border hover:border-gold"
+                                    ? "border-gold bg-gold/10 text-gold"
+                                    : "border-border hover:border-gold"
                                     }`}
                                 aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
                             >
