@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { AdminIcon, icons } from "@/components/admin/AdminIcons";
-import axios from "axios";
+import api from "@/lib/api";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 
@@ -20,10 +20,8 @@ export default function DashboardPage() {
     const { data, isLoading, error } = useQuery({
         queryKey: ["adminDashboardStats"],
         queryFn: async () => {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`, {
-                withCredentials: true
-            });
-            return response.data.data as DashboardStats; // Based on ApiResponse wrapper
+            const response = await api.get("/admin/dashboard");
+            return response.data.data as DashboardStats;
         }
     });
 

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import api from "@/lib/api";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { AdminIcon, icons } from "@/components/admin/AdminIcons";
-import ProductFormModal from "@/components/admin/ProductFormModal";
+import ProductFormModal from "../../components/admin/ProductFormModal";
 import { toast } from "sonner";
 
 export default function ProductsAdminPage() {
@@ -15,16 +15,14 @@ export default function ProductsAdminPage() {
     const { data, isLoading } = useQuery({
         queryKey: ["adminProducts"],
         queryFn: async () => {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
+            const response = await api.get("/products");
             return response.data.data.products || [];
         }
     });
 
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/products/${id}`, {
-                withCredentials: true
-            });
+            await api.delete(`/products/${id}`);
         },
         onSuccess: () => {
             toast.success("Product deleted successfully");

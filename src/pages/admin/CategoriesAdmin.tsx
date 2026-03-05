@@ -1,33 +1,43 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import api from "@/lib/api";
 import { toast } from "sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { AdminIcon, icons } from "@/components/admin/AdminIcons";
 
 export default function CategoriesAdminPage() {
     const queryClient = useQueryClient();
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<any>(null);
     const [formData, setFormData] = useState({ name: "", description: "" });
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const { data: categories, isLoading } = useQuery({
         queryKey: ["adminCategories"],
         queryFn: async () => {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/categories`);
+            const response = await api.get("/categories");
             return response.data.data.categories || [];
         }
     });
 
     const saveMutation = useMutation({
-        mutationFn: async (data: { id?: string; name: string; description: string }) => {
+        mutationFn: async (data: any) => {
+            const submitData = new FormData();
+            submitData.append("name", data.name);
+            submitData.append("description", data.description);
+            if (selectedFile) {
+                submitData.append("image", selectedFile);
+            }
+
             if (data.id) {
-                await axios.put(`${import.meta.env.VITE_API_URL}/api/categories/${data.id}`, data, {
-                    withCredentials: true
+                await api.put(`/categories/${data.id}`, submitData, {
+                    headers: { "Content-Type": "multipart/form-data" }
                 });
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/api/categories`, data, {
-                    withCredentials: true
+                await api.post("/categories", submitData, {
+                    headers: { "Content-Type": "multipart/form-data" }
                 });
             }
         },
@@ -43,9 +53,7 @@ export default function CategoriesAdminPage() {
 
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/api/categories/${id}`, {
-                withCredentials: true
-            });
+            await api.delete(`/categories/${id}`);
         },
         onSuccess: () => {
             toast.success("Category deleted");
@@ -59,19 +67,33 @@ export default function CategoriesAdminPage() {
     const openAddForm = () => {
         setEditingCategory(null);
         setFormData({ name: "", description: "" });
+        setSelectedFile(null);
+        setImagePreview(null);
         setIsFormOpen(true);
     };
 
     const openEditForm = (category: any) => {
         setEditingCategory(category);
         setFormData({ name: category.name, description: category.description || "" });
+        setSelectedFile(null);
+        setImagePreview(category.image || null);
         setIsFormOpen(true);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSelectedFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
     };
 
     const closeForm = () => {
         setIsFormOpen(false);
         setEditingCategory(null);
         setFormData({ name: "", description: "" });
+        setSelectedFile(null);
+        setImagePreview(null);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -115,23 +137,31 @@ export default function CategoriesAdminPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {(categories || []).map((category: any) => (
-                        <div key={category.id} className="bg-white rounded-2xl p-6 shadow-sm border border-[#EBEBEB] group">
-                            <div className="w-12 h-12 rounded-xl bg-[#F7F4F0] flex items-center justify-center mb-4 text-charcoal">
-                                <AdminIcon d={icons.categories} size={24} stroke="#8B5E5F" sw={1.5} />
-                            </div>
-                            <h3 className="font-display font-bold text-lg text-charcoal mb-1">{category.name}</h3>
-                            <p className="text-sm text-muted-foreground mb-6 line-clamp-2 min-h-[40px]">
-                                {category.description || "No description provided."}
-                            </p>
+                        <div key={category.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#EBEBEB] group">
+                            {category.image ? (
+                                <div className="aspect-video w-full bg-[#F7F4F0] overflow-hidden">
+                                    <img src={category.image} alt={category.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                </div>
+                            ) : (
+                                <div className="aspect-video w-full bg-[#F7F4F0] flex items-center justify-center text-charcoal">
+                                    <AdminIcon d={icons.categories} size={32} stroke="#8B5E5F" sw={1.5} />
+                                </div>
+                            )}
+                            <div className="p-6">
+                                <h3 className="font-display font-bold text-lg text-charcoal mb-1">{category.name}</h3>
+                                <p className="text-sm text-muted-foreground mb-6 line-clamp-2 min-h-[40px]">
+                                    {category.description || "No description provided."}
+                                </p>
 
-                            <div className="flex items-center justify-between pt-4 border-t border-[#EBEBEB]">
-                                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => openEditForm(category)} className="p-2 bg-muted text-charcoal rounded-lg hover:bg-[#EBEBEB] transition-colors" title="Edit">
-                                        <AdminIcon d={icons.edit} size={14} stroke="#343434" sw={2} />
-                                    </button>
-                                    <button onClick={() => handleDelete(category.id)} className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors" title="Delete">
-                                        <AdminIcon d={icons.trash} size={14} stroke="#EF4444" sw={2} />
-                                    </button>
+                                <div className="flex items-center justify-between pt-4 border-t border-[#EBEBEB]">
+                                    <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => openEditForm(category)} className="p-2 bg-muted text-charcoal rounded-lg hover:bg-[#EBEBEB] transition-colors" title="Edit">
+                                            <AdminIcon d={icons.edit} size={14} stroke="#343434" sw={2} />
+                                        </button>
+                                        <button onClick={() => handleDelete(category.id)} className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors" title="Delete">
+                                            <AdminIcon d={icons.trash} size={14} stroke="#EF4444" sw={2} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -155,6 +185,36 @@ export default function CategoriesAdminPage() {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Image Upload */}
+                            <div>
+                                <label className="block text-xs font-semibold text-charcoal mb-1.5 uppercase tracking-wider">Category Image</label>
+                                <div
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="aspect-video w-full rounded-xl bg-[#F7F4F0] border-2 border-dashed border-[#DDD] hover:border-gold transition-colors cursor-pointer overflow-hidden flex flex-col items-center justify-center relative group"
+                                >
+                                    {imagePreview ? (
+                                        <>
+                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <span className="text-white text-xs font-bold uppercase tracking-widest">Change Image</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <AdminIcon d={icons.upload} size={24} stroke="#999" />
+                                            <span className="text-xs text-muted-foreground font-medium mt-2">Upload Image</span>
+                                        </>
+                                    )}
+                                </div>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                    accept="image/*"
+                                />
+                            </div>
+
                             <div>
                                 <label className="block text-xs font-semibold text-charcoal mb-1.5 uppercase tracking-wider">Name *</label>
                                 <input
@@ -173,7 +233,7 @@ export default function CategoriesAdminPage() {
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     className="w-full px-4 py-2.5 bg-[#FDFBF9] border border-[#DDD] rounded-xl text-sm outline-none focus:border-gold transition-colors resize-none"
                                     placeholder="Category description..."
-                                    rows={4}
+                                    rows={3}
                                 />
                             </div>
 

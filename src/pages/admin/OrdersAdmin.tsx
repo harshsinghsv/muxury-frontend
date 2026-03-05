@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import api from "@/lib/api";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -15,18 +15,14 @@ export default function OrdersAdminPage() {
     const { data, isLoading } = useQuery({
         queryKey: ["adminOrders"],
         queryFn: async () => {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders`, {
-                withCredentials: true
-            });
+            const response = await api.get("/orders");
             return response.data.data.orders || [];
         }
     });
 
     const updateStatusMutation = useMutation({
         mutationFn: async ({ id, status }: { id: string; status: string }) => {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/orders/${id}/status`, { status }, {
-                withCredentials: true
-            });
+            await api.put(`/orders/${id}/status`, { status });
         },
         onMutate: ({ id }) => {
             setUpdatingId(id);
@@ -141,10 +137,10 @@ export default function OrdersAdminPage() {
                                             </td>
                                             <td className="px-6 py-5 text-center">
                                                 <span className={`inline-flex items-center justify-center w-28 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${order.status === 'DELIVERED' ? 'bg-[#EDF5EC] text-[#2F6B2E] border border-green-200' :
-                                                        order.status === 'PROCESSING' ? 'bg-[#FFF9E6] text-[#A67C00] border border-yellow-200' :
-                                                            order.status === 'SHIPPED' ? 'bg-[#EBF3FB] text-[#2965A8] border border-blue-200' :
-                                                                order.status === 'CANCELLED' ? 'bg-[#FAECEC] text-[#A82929] border border-red-200' :
-                                                                    'bg-gray-100 text-gray-600 border border-gray-200'
+                                                    order.status === 'PROCESSING' ? 'bg-[#FFF9E6] text-[#A67C00] border border-yellow-200' :
+                                                        order.status === 'SHIPPED' ? 'bg-[#EBF3FB] text-[#2965A8] border border-blue-200' :
+                                                            order.status === 'CANCELLED' ? 'bg-[#FAECEC] text-[#A82929] border border-red-200' :
+                                                                'bg-gray-100 text-gray-600 border border-gray-200'
                                                     }`}>
                                                     {updatingId === order.id ? (
                                                         <span className="flex items-center gap-1.5 justify-center w-full">

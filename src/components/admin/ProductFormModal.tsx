@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import api from "@/lib/api";
 import { toast } from "sonner";
 import { AdminIcon, icons } from "@/components/admin/AdminIcons";
 
@@ -17,17 +17,16 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
         name: product?.name || "",
         description: product?.description || "",
         price: product?.price?.toString() || "",
-        compareAtPrice: product?.compareAtPrice?.toString() || "",
+        comparePrice: product?.comparePrice?.toString() || "",
         sku: product?.sku || "",
         stock: product?.stock?.toString() || "",
         categoryId: product?.categoryId || "",
-        materials: product?.materials?.join(", ") || "",
-        careInstructions: product?.careInstructions || "",
-        sustainability: product?.sustainability || "",
+        brand: product?.brand || "",
+        tags: product?.tags?.join(", ") || "",
         isActive: product?.isActive ?? true,
     });
 
-    const [images, setImages] = useState<any[]>(product?.images || []);
+    const [images, setImages] = useState<string[]>(product?.images || []);
     const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
     const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -36,7 +35,7 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
     const { data: categories = [] } = useQuery({
         queryKey: ["categories"],
         queryFn: async () => {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/categories`);
+            const res = await api.get("/categories");
             return res.data.data.categories;
         }
     });
@@ -58,9 +57,9 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
         }
     };
 
-    const handleRemoveExistingImage = (imageId: string) => {
-        setImages((prev) => prev.filter(img => img.publicId !== imageId));
-        setImagesToDelete((prev) => [...prev, imageId]);
+    const handleRemoveExistingImage = (imagePath: string) => {
+        setImages((prev) => prev.filter(img => img !== imagePath));
+        setImagesToDelete((prev) => [...prev, imagePath]);
     };
 
     const handleRemoveNewImage = (index: number) => {
@@ -90,38 +89,33 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
             submitData.append("name", formData.name);
             submitData.append("description", formData.description);
             submitData.append("price", formData.price);
-            if (formData.compareAtPrice) submitData.append("compareAtPrice", formData.compareAtPrice);
+            if (formData.comparePrice) submitData.append("comparePrice", formData.comparePrice);
             submitData.append("sku", formData.sku);
             submitData.append("stock", formData.stock);
             submitData.append("categoryId", formData.categoryId);
+            if (formData.brand) submitData.append("brand", formData.brand);
 
-            const materialsArray = formData.materials.split(",").map(m => m.trim()).filter(Boolean);
-            materialsArray.forEach(m => submitData.append("materials[]", m));
+            const tagsArray = formData.tags.split(",").map(t => t.trim()).filter(Boolean);
+            submitData.append("tags", JSON.stringify(tagsArray));
 
-            if (formData.careInstructions) submitData.append("careInstructions", formData.careInstructions);
-            if (formData.sustainability) submitData.append("sustainability", formData.sustainability);
             submitData.append("isActive", formData.isActive.toString());
+
+            // Append existing images that were kept
+            submitData.append("images", JSON.stringify(images));
 
             // Append new images
             newImageFiles.forEach((file) => {
                 submitData.append("images", file);
             });
 
-            // Append images to delete
-            imagesToDelete.forEach((id) => {
-                submitData.append("deleteImages[]", id); // Assuming backend supports this
-            });
-
             if (product) {
-                await axios.put(`${import.meta.env.VITE_API_URL}/api/products/${product.id}`, submitData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                    withCredentials: true
+                await api.put(`/products/${product.id}`, submitData, {
+                    headers: { "Content-Type": "multipart/form-data" }
                 });
                 toast.success("Product updated successfully");
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/api/products`, submitData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                    withCredentials: true
+                await api.post("/products", submitData, {
+                    headers: { "Content-Type": "multipart/form-data" }
                 });
                 toast.success("Product created successfully");
             }
@@ -224,8 +218,8 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
                                         <label className="block text-xs font-semibold text-charcoal mb-1.5 uppercase tracking-wider">Compare Rate (₹)</label>
                                         <input
                                             type="number"
-                                            name="compareAtPrice"
-                                            value={formData.compareAtPrice}
+                                            name="comparePrice"
+                                            value={formData.comparePrice}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2.5 bg-white border border-[#DDD] rounded-xl text-sm outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all"
                                             placeholder="0.00"
@@ -279,14 +273,26 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-semibold text-charcoal mb-1.5 uppercase tracking-wider">Materials (comma separated)</label>
+                                    <label className="block text-xs font-semibold text-charcoal mb-1.5 uppercase tracking-wider">Brand</label>
                                     <input
                                         type="text"
-                                        name="materials"
-                                        value={formData.materials}
+                                        name="brand"
+                                        value={formData.brand}
                                         onChange={handleChange}
                                         className="w-full px-4 py-2.5 bg-white border border-[#DDD] rounded-xl text-sm outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all"
-                                        placeholder="100% Silk, Cotton Lining"
+                                        placeholder="e.g. Muxury"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-charcoal mb-1.5 uppercase tracking-wider">Tags (comma separated)</label>
+                                    <input
+                                        type="text"
+                                        name="tags"
+                                        value={formData.tags}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2.5 bg-white border border-[#DDD] rounded-xl text-sm outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all"
+                                        placeholder="Summer, Elegant, New Arrival"
                                     />
                                 </div>
                             </div>
@@ -315,12 +321,12 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
                                 {/* Existing Images */}
-                                {images.map((img) => (
-                                    <div key={img.publicId} className="aspect-[4/5] bg-[#F7F4F0] rounded-xl relative overflow-hidden group border border-[#EBEBEB]">
-                                        <img src={img.url} alt="Product" className="w-full h-full object-cover" />
+                                {images.map((imgUrl) => (
+                                    <div key={imgUrl} className="aspect-[4/5] bg-[#F7F4F0] rounded-xl relative overflow-hidden group border border-[#EBEBEB]">
+                                        <img src={imgUrl} alt="Product" className="w-full h-full object-cover" />
                                         <button
                                             type="button"
-                                            onClick={() => handleRemoveExistingImage(img.publicId)}
+                                            onClick={() => handleRemoveExistingImage(imgUrl)}
                                             className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                                         >
                                             <AdminIcon d={icons.trash} size={14} stroke="#EF4444" sw={2} />
