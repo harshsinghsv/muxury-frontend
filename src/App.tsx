@@ -14,7 +14,6 @@ import { RecentlyViewedProvider } from "@/context/RecentlyViewedContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/admin/AdminRoute";
 import Header from "@/components/Header";
-import StatusBar from "@/components/StatusBar";
 import BottomNav from "@/components/BottomNav";
 
 // Pages
@@ -51,7 +50,6 @@ const AppContent = () => {
       <Toaster />
       <Sonner />
 
-      {!isAdminRoute && <StatusBar />}
       {!isAdminRoute && <Header />}
 
       <main className={`flex-1 overflow-y-auto ${!isAdminRoute ? 'pb-24' : ''} [-webkit-overflow-scrolling:touch]`}>
