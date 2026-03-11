@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+import tailwindAnimate from "tailwindcss-animate";
+
 export default {
 	darkMode: ["class"],
 	content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
@@ -53,6 +55,8 @@ export default {
 				"uxury-dark": "#343434",
 				"uxury-neutral": "#F5F5F5",
 				"uxury-border": "#EBEBEB",
+				"charcoal": "#343434",
+				"gold": "#C5A25D",
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -101,5 +105,5 @@ export default {
 			},
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [tailwindAnimate],
 } satisfies Config;
