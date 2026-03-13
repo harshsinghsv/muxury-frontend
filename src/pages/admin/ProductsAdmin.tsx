@@ -11,6 +11,8 @@ export default function ProductsAdminPage() {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+    const [deleteTargetName, setDeleteTargetName] = useState<string>("");
 
     const { data, isLoading } = useQuery({
         queryKey: ["adminProducts"],
@@ -27,16 +29,21 @@ export default function ProductsAdminPage() {
         onSuccess: () => {
             toast.success("Product deleted successfully");
             queryClient.invalidateQueries({ queryKey: ["adminProducts"] });
+            setDeleteTargetId(null);
         },
         onError: (err: any) => {
             toast.error(err.response?.data?.message || "Failed to delete product");
+            setDeleteTargetId(null);
         }
     });
 
-    const handleDelete = (id: string) => {
-        if (window.confirm("Are you sure you want to delete this product?")) {
-            deleteMutation.mutate(id);
-        }
+    const handleDeleteClick = (id: string, name: string) => {
+        setDeleteTargetId(id);
+        setDeleteTargetName(name);
+    };
+
+    const handleDeleteConfirm = () => {
+        if (deleteTargetId) deleteMutation.mutate(deleteTargetId);
     };
 
     const handleEdit = (product: any) => {
@@ -110,7 +117,7 @@ export default function ProductsAdminPage() {
                                         <AdminIcon d={icons.edit} size={18} stroke="#343434" sw={2} />
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(product.id)}
+                                        onClick={() => handleDeleteClick(product.id, product.name)}
                                         className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-red-500 hover:scale-110 transition-transform"
                                         title="Delete"
                                     >
@@ -139,6 +146,37 @@ export default function ProductsAdminPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Delete Confirmation Dialog */}
+            {deleteTargetId && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-sm" onClick={() => setDeleteTargetId(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                            <AdminIcon d={icons.trash} size={22} stroke="#EF4444" sw={2} />
+                        </div>
+                        <h3 className="font-display text-lg font-bold text-charcoal text-center mb-1">Delete Product</h3>
+                        <p className="text-sm text-muted-foreground text-center mb-6">
+                            Are you sure you want to delete <span className="font-semibold text-charcoal">"{deleteTargetName}"</span>? This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDeleteTargetId(null)}
+                                className="flex-1 px-4 py-2.5 border border-[#EBEBEB] bg-white text-charcoal font-medium text-sm rounded-xl hover:bg-muted transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                disabled={deleteMutation.isPending}
+                                className="flex-1 px-4 py-2.5 bg-red-500 text-white font-medium text-sm rounded-xl hover:bg-red-600 disabled:opacity-70 transition-colors"
+                            >
+                                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
