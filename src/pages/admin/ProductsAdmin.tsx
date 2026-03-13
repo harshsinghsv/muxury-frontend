@@ -95,7 +95,7 @@ export default function ProductsAdminPage() {
                         <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#EBEBEB] group">
                             <div className="aspect-[4/5] relative bg-[#F7F4F0] overflow-hidden">
                                 <img
-                                    src={product.images?.[0]?.url || "https://placehold.co/400x500/F7F4F0/343434?text=No+Image"}
+                                    src={product.images?.[0] || "https://placehold.co/400x500/F7F4F0/343434?text=No+Image"}
                                     alt={product.name}
                                     className="w-full h-full object-cover"
                                 />

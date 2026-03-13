@@ -72,6 +72,7 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
         if (!formData.sku) return "SKU is required";
         if (!formData.stock || isNaN(Number(formData.stock))) return "Valid Stock quantity is required";
         if (!formData.categoryId) return "Category is required";
+        if (images.length === 0 && newImageFiles.length === 0) return "At least one product image is required";
         return null;
     };
 
