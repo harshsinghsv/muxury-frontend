@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import api from "@/lib/api";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -13,18 +13,14 @@ export default function CustomersAdminPage() {
     const { data: responseData, isLoading } = useQuery({
         queryKey: ["adminCustomers"],
         queryFn: async () => {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/customers`, {
-                withCredentials: true
-            });
+            const response = await api.get("/admin/customers");
             return response.data.data; // { customers: [], pagination: {} }
         }
     });
 
     const toggleBlockMutation = useMutation({
         mutationFn: async ({ id, isBlocked }: { id: string; isBlocked: boolean }) => {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/customers/${id}/block`, { isBlocked }, {
-                withCredentials: true
-            });
+            await api.put(`/admin/customers/${id}/block`, { isBlocked });
         },
         onSuccess: (data, variables) => {
             toast.success(variables.isBlocked ? "Customer blocked" : "Customer unblocked");
