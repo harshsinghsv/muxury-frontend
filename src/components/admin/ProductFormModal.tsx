@@ -385,7 +385,7 @@ export default function ProductFormModal({ product, onClose }: ProductFormModalP
                         ) : (
                             <AdminIcon d={icons.check} size={16} stroke="#fff" sw={2.5} />
                         )}
-                        {loading ? "Saving..." : "Save Product"}
+                        {loading ? "Saving..." : product ? "Update Product" : "Save Product"}
                     </button>
                 </div>
             </div>
