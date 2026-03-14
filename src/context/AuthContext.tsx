@@ -129,7 +129,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
                 const { data: res } = await api.post('/auth/register', data);
                 dispatch({ type: 'SET_LOADING', payload: false });
-                // Registration does NOT log user in — they must verify email first
+                
+                // If auto-logged in (e.g. development mode bypasses email verification)
+                if (res.data?.accessToken && res.data?.refreshToken && res.data?.user) {
+                    tokenStorage.setTokens(res.data.accessToken, res.data.refreshToken);
+                    dispatch({ type: 'SET_USER', payload: res.data.user });
+                }
+                
                 return { message: res.message };
             } catch (err: any) {
                 dispatch({ type: 'SET_LOADING', payload: false });
