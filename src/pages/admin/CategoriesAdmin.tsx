@@ -136,36 +136,50 @@ export default function CategoriesAdminPage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {(categories || []).map((category: any) => (
-                        <div key={category.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#EBEBEB] group">
-                            {category.image ? (
-                                <div className="aspect-video w-full bg-[#F7F4F0] overflow-hidden">
-                                    <img src={category.image} alt={category.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                </div>
-                            ) : (
-                                <div className="aspect-video w-full bg-[#F7F4F0] flex items-center justify-center text-charcoal">
-                                    <AdminIcon d={icons.categories} size={32} stroke="#8B5E5F" sw={1.5} />
-                                </div>
-                            )}
-                            <div className="p-6">
-                                <h3 className="font-display font-bold text-lg text-charcoal mb-1">{category.name}</h3>
-                                <p className="text-sm text-muted-foreground mb-6 line-clamp-2 min-h-[40px]">
-                                    {category.description || "No description provided."}
-                                </p>
+                    {(categories || []).map((category: any, index: number) => {
+                        const isImageLeft = index % 2 !== 0;
 
-                                <div className="flex items-center justify-between pt-4 border-t border-[#EBEBEB]">
-                                    <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => openEditForm(category)} className="p-2 bg-muted text-charcoal rounded-lg hover:bg-[#EBEBEB] transition-colors" title="Edit">
-                                            <AdminIcon d={icons.edit} size={14} stroke="#343434" sw={2} />
-                                        </button>
-                                        <button onClick={() => handleDelete(category.id)} className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors" title="Delete">
-                                            <AdminIcon d={icons.trash} size={14} stroke="#EF4444" sw={2} />
-                                        </button>
-                                    </div>
+                        return (
+                            <div key={category.id} className="rounded-2xl overflow-hidden shadow-sm border border-[#EBEBEB] group relative h-[140px] lg:h-[160px] bg-[#F4F4F4]">
+                                {/* Image Section */}
+                                <div className={`absolute inset-y-0 ${isImageLeft ? "left-0" : "right-0"} w-[60%] overflow-hidden z-0`}>
+                                    {category.image ? (
+                                        <>
+                                            <img 
+                                                src={category.image} 
+                                                alt={category.name} 
+                                                className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isImageLeft ? "object-left" : "object-right"}`} 
+                                            />
+                                            {/* Smooth gradient fading into the image */}
+                                            <div className={`absolute inset-y-0 ${isImageLeft ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} w-24 from-[#F4F4F4] via-[#F4F4F4]/80 to-transparent z-10 pointer-events-none`}></div>
+                                        </>
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-charcoal bg-[#F4F4F4]">
+                                            <AdminIcon d={icons.categories} size={32} stroke="#8B5E5F" sw={1.5} />
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* Text Content */}
+                                <div className={`absolute inset-y-0 ${isImageLeft ? "right-0" : "left-0"} w-[60%] p-5 md:p-6 flex flex-col justify-center z-20 pointer-events-none`}>
+                                    <h3 className="font-display font-medium text-xl md:text-[22px] text-[#C08584] mb-1.5 pointer-events-auto leading-tight">{category.name}</h3>
+                                    <p className="text-[13px] md:text-sm text-charcoal/80 font-medium line-clamp-2 pointer-events-auto">
+                                        {category.description || "No description provided."}
+                                    </p>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className={`absolute top-3 ${isImageLeft ? "left-3" : "right-3"} flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-30`}>
+                                    <button onClick={() => openEditForm(category)} className="p-2 bg-white/90 backdrop-blur-sm text-charcoal rounded-lg hover:bg-white transition-colors shadow-sm pointer-events-auto" title="Edit">
+                                        <AdminIcon d={icons.edit} size={14} stroke="#343434" sw={2} />
+                                    </button>
+                                    <button onClick={() => handleDelete(category.id)} className="p-2 bg-red-50/90 backdrop-blur-sm text-red-500 rounded-lg hover:bg-red-100 transition-colors shadow-sm pointer-events-auto" title="Delete">
+                                        <AdminIcon d={icons.trash} size={14} stroke="#EF4444" sw={2} />
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
