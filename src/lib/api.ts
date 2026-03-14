@@ -62,6 +62,11 @@ api.interceptors.response.use(
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Do not intercept 401s from the login endpoint itself
+      if (originalRequest.url?.includes('/auth/login')) {
+        return Promise.reject(error);
+      }
+
       const refreshToken = tokenStorage.getRefresh();
       if (!refreshToken) {
         tokenStorage.clear();

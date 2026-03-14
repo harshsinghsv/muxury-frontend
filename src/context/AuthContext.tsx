@@ -133,7 +133,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 return { message: res.message };
             } catch (err: any) {
                 dispatch({ type: 'SET_LOADING', payload: false });
-                const message = err?.response?.data?.message || 'Registration failed. Please try again.';
+                let message = err?.response?.data?.message || 'Registration failed. Please try again.';
+                
+                // Format detailed validation errors if they exist
+                if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+                    message = err.response.data.errors.map((e: any) => e.message).join(' | ');
+                }
+                
                 throw new Error(message);
             }
         },

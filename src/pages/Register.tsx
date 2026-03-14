@@ -24,7 +24,8 @@ const Register = () => {
         try {
             const names = name.split(" ");
             const firstName = names[0];
-            const lastName = names.length > 1 ? names.slice(1).join(" ") : "";
+            // If they only enter one name, fallback to a dot so backend requirement is met
+            const lastName = names.length > 1 ? names.slice(1).join(" ") : ".";
 
             await register({
                 firstName,
@@ -33,8 +34,8 @@ const Register = () => {
                 password
             });
             navigate("/");
-        } catch (error) {
-            toast.error("Registration failed");
+        } catch (error: any) {
+            toast.error(error.message || "Registration failed");
         } finally {
             setLoading(false);
         }

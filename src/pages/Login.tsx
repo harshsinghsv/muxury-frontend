@@ -23,8 +23,13 @@ const Login = () => {
         try {
             await login(email, password);
             navigate("/");
-        } catch (error) {
-            toast.error("Invalid credentials");
+        } catch (error: any) {
+            if (error.message.toLowerCase().includes("invalid email or password")) {
+                toast.info("Account not found. Please sign up first.");
+                navigate("/register");
+            } else {
+                toast.error(error.message || "Invalid credentials");
+            }
         } finally {
             setLoading(false);
         }
