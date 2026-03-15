@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { User, Mail, Package, Heart, ChevronRight, Settings, MapPin, CreditCard, LogOut } from "lucide-react";
+import { User, Package, Heart, ChevronRight, Settings, MapPin, CreditCard, LogOut, Lock, Bell } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { getProductById } from "@/data/products";
@@ -40,14 +40,26 @@ const Profile = () => {
         </div>
     );
 
-    // Sidebar navigation items
-    const navItems = [
-        { id: 'profile', icon: User, label: 'Personal Information' },
-        { id: 'orders', icon: Package, label: 'My Orders', action: () => setView("orders") },
-        { id: 'wishlist', icon: Heart, label: 'My Wishlist', action: () => setView("wishlist") },
-        { id: 'address', icon: MapPin, label: 'Shipping Address' },
-        { id: 'payment', icon: CreditCard, label: 'Payment Methods' },
-        { id: 'settings', icon: Settings, label: 'Settings' },
+    // Sidebar navigation sections corresponding to reference design
+    const navSections = [
+        {
+            title: 'Personal Info',
+            items: [
+                { id: 'profile', icon: User, label: 'Your Profile', action: () => {} },
+                { id: 'change-password', icon: Lock, label: 'Change Password', action: () => navigate("/change-password") },
+                { id: 'address', icon: MapPin, label: 'Shipping Address', action: () => {} },
+                { id: 'payment', icon: CreditCard, label: 'Payment Methods', action: () => {} },
+            ]
+        },
+        {
+            title: 'General',
+            items: [
+                { id: 'orders', icon: Package, label: 'My Orders', action: () => setView("orders") },
+                { id: 'wishlist', icon: Heart, label: 'My Wishlist', action: () => setView("wishlist") },
+                { id: 'notification', icon: Bell, label: 'Notification', action: () => {} },
+                { id: 'settings', icon: Settings, label: 'Settings', action: () => {} },
+            ]
+        }
     ];
 
     const { data: realOrders, isLoading: ordersLoading } = useOrders();
@@ -135,13 +147,8 @@ const Profile = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-24 md:pb-12 z-0">
-            {/* Mobile Header for Main Menu */}
-            <div className="md:hidden">
-                <MobileHeader title="Profile" onBack={() => navigate(-1)} />
-            </div>
-
-            <main className="px-5 md:px-12 lg:px-24 xl:px-32 md:pt-12 md:pb-12 h-full">
+        <div className="min-h-screen bg-white md:bg-[#FAFAFA] flex flex-col pb-24 md:pb-12 z-0">
+            <main className="px-5 md:px-12 lg:px-24 xl:px-32 pt-2 md:pt-12 md:pb-12 h-full">
 
                 {/* Desktop Header */}
                 <div className="hidden md:flex items-center justify-between mb-12">
@@ -155,52 +162,62 @@ const Profile = () => {
                 <div className="flex flex-col md:flex-row gap-8 lg:gap-16">
                     {/* Sidebar / Mobile Main Menu */}
                     <div className="md:w-1/3 lg:w-1/4 flex-shrink-0">
-                        {/* User Profile Card */}
-                        <div className="flex flex-col items-center md:items-start mb-8 md:mb-10 md:bg-white md:p-6 md:rounded-3xl md:border md:border-[#EBEBEB] md:shadow-sm">
-                            <div className="w-24 h-24 md:w-20 md:h-20 rounded-full bg-[#343434] flex items-center justify-center mb-4 md:mb-5">
-                                <span className="font-['Playfair_Display'] text-3xl md:text-2xl text-white">
-                                    {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-                                </span>
+                        {/* User Profile Info */}
+                        <div className="flex flex-col items-center mb-8 md:bg-white md:p-6 md:rounded-3xl md:border md:border-[#EBEBEB] md:shadow-sm mt-4 md:mt-0">
+                            <div className="w-[100px] h-[100px] md:w-20 md:h-20 rounded-full bg-[#343434] overflow-hidden flex items-center justify-center mb-4 md:mb-5 border border-[#EBEBEB]">
+                                {user.avatar ? (
+                                    <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="font-['Playfair_Display'] text-4xl md:text-2xl text-white">
+                                        {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                                    </span>
+                                )}
                             </div>
-                            <h2 className="font-['Playfair_Display'] text-2xl md:text-xl font-bold text-[#343434] mb-1">{user.firstName} {user.lastName}</h2>
-                            <p className="font-['DM_Sans'] text-sm md:text-sm text-[#999999] break-all">{user.email}</p>
+                            <h2 className="font-['DM_Sans'] text-xl font-medium text-[#343434] mb-1">{user.firstName} {user.lastName}</h2>
+                            <p className="font-['DM_Sans'] text-[15px] font-medium text-[#343434] break-all">@{user.email.split('@')[0]}</p>
                         </div>
 
-                        {/* Navigation Menu */}
-                        <div className="bg-white rounded-2xl border border-[#EBEBEB] p-2 mb-6 shadow-sm">
-                            {navItems.map((item, index) => {
-                                const Icon = item.icon;
-                                const isActive = window.innerWidth >= 768 && (view === item.id || (view === 'menu' && item.id === 'orders'));
+                        <div className="border-b opacity-50 border-[#EBEBEB] w-full mb-8 md:hidden -mx-5 px-5"></div>
 
-                                return (
-                                    <button
-                                        key={item.id}
-                                        onClick={item.action}
-                                        className={`w-full flex items-center justify-between p-4 rounded-xl transition-colors ${isActive ? 'bg-[#343434]' : 'hover:bg-[#FAF8F7] active:bg-[#FAF8F7]'}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isActive ? 'bg-white/10' : 'bg-[#FAF8F7]'}`}>
-                                                <Icon size={18} className={isActive ? 'text-white' : 'text-[#343434]'} />
-                                            </div>
-                                            <span className={`font-['DM_Sans'] font-medium transition-colors ${isActive ? 'text-white' : 'text-[#343434]'}`}>
-                                                {item.label}
-                                            </span>
-                                        </div>
-                                        {(!isActive || window.innerWidth < 768) && <ChevronRight size={18} className="text-[#999999]" />}
-                                    </button>
-                                );
-                            })}
+                        {/* Navigation Sections */}
+                        <div className="flex flex-col gap-8 md:gap-6 md:bg-white md:rounded-3xl md:border md:border-[#EBEBEB] md:shadow-sm md:p-4">
+                            {navSections.map((section, idx) => (
+                                <div key={idx} className="flex flex-col w-full">
+                                    <h3 className="font-['DM_Sans'] text-[15px] font-bold text-[#343434] mb-4 md:px-2">{section.title}</h3>
+                                    <div className="flex flex-col">
+                                        {section.items.map((item, itemIdx) => {
+                                            const Icon = item.icon;
+                                            const isActive = window.innerWidth >= 768 && (view === item.id || (view === 'menu' && item.id === 'orders'));
+
+                                            return (
+                                                <div key={item.id} className="w-full">
+                                                    <button
+                                                        onClick={item.action}
+                                                        className={`w-full flex items-center gap-5 py-4 transition-colors ${isActive && window.innerWidth >= 768 ? 'bg-[#FAF8F7] rounded-xl px-2' : 'hover:bg-[#FAF8F7] active:bg-[#FAF8F7] md:px-2 md:rounded-xl'}`}
+                                                    >
+                                                        <Icon size={20} className="text-[#343434] stroke-[1.5]" />
+                                                        <span className="font-['DM_Sans'] text-[15px] font-medium text-[#343434]">
+                                                            {item.label}
+                                                        </span>
+                                                    </button>
+                                                    {itemIdx < section.items.length - 1 && (
+                                                        <div className="border-b opacity-50 border-[#EBEBEB] ml-10"></div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    {idx < navSections.length - 1 && (
+                                        <div className="border-b opacity-50 border-[#EBEBEB] mt-8 w-full md:hidden"></div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
 
                         {/* Mobile Logout (Hidden on Desktop) */}
-                        <div className="md:hidden bg-white rounded-2xl border border-[#EBEBEB] p-2">
-                            <button onClick={handleLogout} className="w-full flex items-center justify-between p-4 active:bg-[#FAF8F7] transition-colors rounded-xl">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-[#F5F0EE] flex items-center justify-center">
-                                        <LogOut size={18} className="text-[#CA8385]" />
-                                    </div>
-                                    <span className="font-['DM_Sans'] font-bold text-[#CA8385]">Log Out</span>
-                                </div>
+                        <div className="md:hidden mt-12 mb-8 flex justify-center">
+                            <button onClick={handleLogout} className="font-['DM_Sans'] text-[15px] font-medium text-[#EF5050] active:scale-95 transition-transform">
+                                Logout
                             </button>
                         </div>
                     </div>
