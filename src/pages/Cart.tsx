@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
+import Icon from "@/components/Icon";
 
 const Cart = () => {
     const navigate = useNavigate();
@@ -21,13 +22,13 @@ const Cart = () => {
                     onClick={() => navigate(-1)}
                     className="w-10 h-10 border border-[#EBEBEB] rounded-full flex items-center justify-center bg-white active:scale-95 transition-transform"
                 >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <Icon name="back" size="w-5 h-5" />
                 </button>
                 <h1 className="font-['Playfair_Display'] text-xl font-bold text-[#343434]">
                     My Cart
                 </h1>
                 <button className="w-10 h-10 border border-[#EBEBEB] rounded-full flex items-center justify-center bg-white active:scale-95 transition-transform">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <Icon name="buy" size="w-5 h-5" />
                 </button>
             </div>
 
@@ -41,7 +42,7 @@ const Cart = () => {
                 {isEmpty ? (
                     <div className="flex flex-col items-center justify-center text-center mt-20 bg-white md:bg-transparent rounded-3xl md:border md:border-[#EBEBEB] md:py-32">
                         <div className="w-20 h-20 bg-[#F5F0EE] rounded-full flex items-center justify-center mb-6">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#CA8385" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                            <Icon name="bag" size="w-8 h-8" className="text-[#CA8385]" />
                         </div>
                         <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-2">Your cart is empty</h2>
                         <p className="font-['DM_Sans'] text-[#999999] text-base mb-8 max-w-sm">
@@ -90,7 +91,7 @@ const Cart = () => {
                                                 onClick={() => removeFromCart(item.product.id, item.selectedSize)}
                                                 className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#FAF8F7] flex items-center justify-center text-[#999999] hover:text-[#CA8385] hover:bg-white border border-transparent hover:border-[#CA8385] active:scale-95 transition-all"
                                             >
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                <Icon name="close" size="w-4 h-4" />
                                             </button>
                                         </div>
 
@@ -104,7 +105,7 @@ const Cart = () => {
                                                     onClick={() => handleQuantityChange(item.product.id, item.selectedSize, item.quantity - 1)}
                                                     className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-[#343434] bg-white rounded-full shadow-sm md:shadow-none md:border md:border-[#EBEBEB] active:scale-95 transition-transform hover:border-[#343434]"
                                                 >
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                    <Icon name="close" size="w-3 h-3" />
                                                 </button>
                                                 <span className="font-['DM_Sans'] text-[#343434] text-sm md:text-base font-medium w-8 md:w-12 text-center block">
                                                     {item.quantity}
@@ -113,7 +114,7 @@ const Cart = () => {
                                                     onClick={() => handleQuantityChange(item.product.id, item.selectedSize, item.quantity + 1)}
                                                     className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-white bg-[#343434] rounded-full shadow-sm md:shadow-none active:scale-95 transition-transform hover:bg-black"
                                                 >
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                    <Icon name="plus" size="w-3 h-3" />
                                                 </button>
                                             </div>
                                         </div>

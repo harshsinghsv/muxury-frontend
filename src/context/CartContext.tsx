@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from "react";
 import { Product } from "@/data/products";
+import { tokenStorage } from "@/lib/api";
+import { syncCartWithBackend } from "@/lib/syncHelpers";
 
 export interface CartItem {
     product: Product;
@@ -9,6 +11,7 @@ export interface CartItem {
 
 interface CartState {
     items: CartItem[];
+    isSyncing: boolean;
 }
 
 type CartAction =
@@ -16,7 +19,8 @@ type CartAction =
     | { type: "REMOVE_FROM_CART"; payload: { productId: string; selectedSize: string } }
     | { type: "UPDATE_QUANTITY"; payload: { productId: string; selectedSize: string; quantity: number } }
     | { type: "CLEAR_CART" }
-    | { type: "HYDRATE"; payload: CartItem[] };
+    | { type: "HYDRATE"; payload: CartItem[] }
+    | { type: "SET_SYNCING"; payload: boolean };
 
 interface CartContextType {
     items: CartItem[];
@@ -52,16 +56,18 @@ function cartReducer(state: CartState, action: CartAction): CartState {
                     ...newItems[existingIndex],
                     quantity: newItems[existingIndex].quantity + quantity,
                 };
-                return { items: newItems };
+                return { ...state, items: newItems };
             }
 
             return {
+                ...state,
                 items: [...state.items, { product, quantity, selectedSize }],
             };
         }
 
         case "REMOVE_FROM_CART": {
             return {
+                ...state,
                 items: state.items.filter(
                     (item) =>
                         !(item.product.id === action.payload.productId && item.selectedSize === action.payload.selectedSize)
@@ -73,6 +79,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
             const { productId, selectedSize, quantity } = action.payload;
             if (quantity <= 0) {
                 return {
+                    ...state,
                     items: state.items.filter(
                         (item) => !(item.product.id === productId && item.selectedSize === selectedSize)
                     ),
@@ -80,6 +87,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
             }
 
             return {
+                ...state,
                 items: state.items.map((item) =>
                     item.product.id === productId && item.selectedSize === selectedSize
                         ? { ...item, quantity }
@@ -89,10 +97,13 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         }
 
         case "CLEAR_CART":
-            return { items: [] };
+            return { ...state, items: [] };
 
         case "HYDRATE":
-            return { items: action.payload };
+            return { ...state, items: action.payload };
+
+        case "SET_SYNCING":
+            return { ...state, isSyncing: action.payload };
 
         default:
             return state;
@@ -100,7 +111,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    const [state, dispatch] = useReducer(cartReducer, { items: [] });
+    const [state, dispatch] = useReducer(cartReducer, { items: [], isSyncing: false });
 
     // Hydrate from localStorage on mount
     useEffect(() => {
@@ -122,6 +133,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error("Failed to save cart to localStorage:", error);
         }
+    }, [state.items]);
+
+    // Sync cart with backend when user is authenticated
+    useEffect(() => {
+        const performSync = async () => {
+            const token = tokenStorage.getAccess();
+            if (!token || state.isSyncing) return;
+
+            dispatch({ type: "SET_SYNCING", payload: true });
+            try {
+                await syncCartWithBackend(state.items);
+            } finally {
+                dispatch({ type: "SET_SYNCING", payload: false });
+            }
+        };
+
+        // Debounce sync to avoid too many requests
+        const syncTimer = setTimeout(performSync, 500);
+        return () => clearTimeout(syncTimer);
     }, [state.items]);
 
     const addToCart = (product: Product, quantity: number, selectedSize: string) => {
