@@ -140,19 +140,7 @@ const Checkout = () => {
 
     return (
         <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-24 md:pb-12 z-0">
-            {/* Mobile Header */}
-            <div className="md:hidden flex items-center justify-between px-5 pt-8 mb-6">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="w-10 h-10 border border-[#EBEBEB] rounded-full flex items-center justify-center bg-white active:scale-95 transition-transform"
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                </button>
-                <h1 className="font-['Playfair_Display'] text-xl font-bold text-[#343434]">
-                    Checkout
-                </h1>
-                <div className="w-10"></div>
-            </div>
+
 
             <main className="flex-1 px-5 md:px-12 lg:px-24 xl:px-32 md:pt-12">
                 {/* Desktop Header */}

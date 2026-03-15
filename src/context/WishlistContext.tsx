@@ -1,14 +1,18 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from "react";
+import { tokenStorage } from "@/lib/api";
+import { syncWishlistWithBackend } from "@/lib/syncHelpers";
 
 interface WishlistState {
-    items: string[]; // Array of product IDs
+    items: string[];
+    isSyncing: boolean;
 }
 
 type WishlistAction =
     | { type: "ADD_TO_WISHLIST"; payload: string }
     | { type: "REMOVE_FROM_WISHLIST"; payload: string }
     | { type: "CLEAR_WISHLIST" }
-    | { type: "HYDRATE"; payload: string[] };
+    | { type: "HYDRATE"; payload: string[] }
+    | { type: "SET_SYNCING"; payload: boolean };
 
 interface WishlistContextType {
     items: string[];
@@ -30,16 +34,19 @@ function wishlistReducer(state: WishlistState, action: WishlistAction): Wishlist
             if (state.items.includes(action.payload)) {
                 return state;
             }
-            return { items: [...state.items, action.payload] };
+            return { ...state, items: [...state.items, action.payload] };
 
         case "REMOVE_FROM_WISHLIST":
-            return { items: state.items.filter((id) => id !== action.payload) };
+            return { ...state, items: state.items.filter((id) => id !== action.payload) };
 
         case "CLEAR_WISHLIST":
-            return { items: [] };
+            return { ...state, items: [] };
 
         case "HYDRATE":
-            return { items: action.payload };
+            return { ...state, items: action.payload };
+
+        case "SET_SYNCING":
+            return { ...state, isSyncing: action.payload };
 
         default:
             return state;
@@ -47,7 +54,7 @@ function wishlistReducer(state: WishlistState, action: WishlistAction): Wishlist
 }
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-    const [state, dispatch] = useReducer(wishlistReducer, { items: [] });
+    const [state, dispatch] = useReducer(wishlistReducer, { items: [], isSyncing: false });
 
     // Hydrate from localStorage on mount
     useEffect(() => {
@@ -69,6 +76,25 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error("Failed to save wishlist to localStorage:", error);
         }
+    }, [state.items]);
+
+    // Sync wishlist with backend when user is authenticated
+    useEffect(() => {
+        const performSync = async () => {
+            const token = tokenStorage.getAccess();
+            if (!token || state.isSyncing) return;
+
+            dispatch({ type: "SET_SYNCING", payload: true });
+            try {
+                await syncWishlistWithBackend(state.items);
+            } finally {
+                dispatch({ type: "SET_SYNCING", payload: false });
+            }
+        };
+
+        // Debounce sync to avoid too many requests
+        const syncTimer = setTimeout(performSync, 500);
+        return () => clearTimeout(syncTimer);
     }, [state.items]);
 
     const addToWishlist = (productId: string) => {

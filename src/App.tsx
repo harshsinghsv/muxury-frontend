@@ -13,6 +13,7 @@ import { RecentlyViewedProvider } from "@/context/RecentlyViewedContext";
 // Components
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/admin/AdminRoute";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 
@@ -46,7 +47,7 @@ const AppContent = () => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className={`w-full ${isAdminRoute ? 'max-w-none' : 'max-w-[390px] md:max-w-none'} mx-auto min-h-screen bg-[#FAFAFA] flex flex-col relative overflow-x-hidden shadow-2xl md:shadow-none`}>
+    <div className={`w-full ${isAdminRoute ? 'max-w-none' : 'max-w-[390px] md:max-w-[1440px] px-0 2xl:px-12'} mx-auto min-h-screen bg-[#FAFAFA] flex flex-col relative overflow-x-hidden shadow-2xl md:shadow-none`}>
       <Toaster />
       <Sonner />
 
@@ -119,21 +120,23 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <RecentlyViewedProvider>
-              <TooltipProvider>
-                <BrowserRouter>
-                  <AppContent />
-                </BrowserRouter>
-              </TooltipProvider>
-            </RecentlyViewedProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <RecentlyViewedProvider>
+                <TooltipProvider>
+                  <BrowserRouter>
+                    <AppContent />
+                  </BrowserRouter>
+                </TooltipProvider>
+              </RecentlyViewedProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 
