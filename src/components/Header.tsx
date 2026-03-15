@@ -1,10 +1,13 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { CgProfile } from "react-icons/cg";
 
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { items } = useCart();
+  const { user, isAuthenticated } = useAuth();
 
   const cartItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -37,8 +40,12 @@ export default function Header() {
             </span>
           )}
         </button>
-        <button onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#EBEBEB]">
-          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150&h=150" alt="Avatar" className="w-full h-full object-cover" />
+        <button onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-[#FAF8F7] text-[#343434] hover:bg-[#EBEBEB] transition-colors font-medium">
+          {isAuthenticated && user?.firstName ? (
+            <span>{user.firstName.charAt(0).toUpperCase()}</span>
+          ) : (
+            <CgProfile size={18} />
+          )}
         </button>
       </div>
     </header>
@@ -79,8 +86,12 @@ export default function Header() {
                 </span>
               )}
             </button>
-            <button onClick={() => navigate('/profile')} className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#EBEBEB] active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
-              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150&h=150" alt="Avatar" className="w-full h-full object-cover" />
+            <button onClick={() => navigate('/profile')} className="w-9 h-9 rounded-full overflow-hidden active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] flex items-center justify-center bg-[#FAF8F7] text-[#343434] font-medium">
+              {isAuthenticated && user?.firstName ? (
+                <span>{user.firstName.charAt(0).toUpperCase()}</span>
+              ) : (
+                <CgProfile size={24} />
+              )}
             </button>
           </div>
         </header>
