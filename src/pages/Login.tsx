@@ -6,7 +6,7 @@ import { toast } from "sonner";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState (false);
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
