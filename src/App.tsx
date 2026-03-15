@@ -47,7 +47,7 @@ const AppContent = () => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className={`w-full ${isAdminRoute ? 'max-w-none' : 'max-w-[390px] md:max-w-[1440px] px-0 2xl:px-12'} mx-auto min-h-screen bg-[#FAFAFA] flex flex-col relative overflow-x-hidden shadow-2xl md:shadow-none`}>
+    <div className={`w-full ${isAdminRoute ? 'max-w-none' : 'max-w-[1440px] px-0 2xl:px-12'} mx-auto min-h-screen bg-[#FAFAFA] flex flex-col relative overflow-x-hidden shadow-2xl md:shadow-none`}>
       <Toaster />
       <Sonner />
 

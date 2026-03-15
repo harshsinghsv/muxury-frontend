@@ -5,6 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { getProductById } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
+import { COPY } from "@/config/constants";
+import OrderSkeleton from "@/components/OrderSkeleton";
 
 import { useOrders, OrderSummary } from "@/hooks/useOrders";
 import { Loader2 } from "lucide-react";
@@ -34,21 +36,21 @@ const Profile = () => {
     // Sidebar navigation sections corresponding to reference design
     const navSections = [
         {
-            title: 'Personal Info',
+            title: COPY.profile.sections.personalInfo,
             items: [
-                { id: 'profile', icon: User, label: 'Your Profile', action: () => {} },
-                { id: 'change-password', icon: Lock, label: 'Change Password', action: () => navigate("/change-password") },
-                { id: 'address', icon: MapPin, label: 'Shipping Address', action: () => {} },
-                { id: 'payment', icon: CreditCard, label: 'Payment Methods', action: () => {} },
+                { id: 'profile', icon: User, label: COPY.profile.menu.profile, action: () => {} },
+                { id: 'change-password', icon: Lock, label: COPY.profile.menu.changePassword, action: () => navigate("/change-password") },
+                { id: 'address', icon: MapPin, label: COPY.profile.menu.address, action: () => {} },
+                { id: 'payment', icon: CreditCard, label: COPY.profile.menu.payment, action: () => {} },
             ]
         },
         {
-            title: 'General',
+            title: COPY.profile.sections.general,
             items: [
-                { id: 'orders', icon: Package, label: 'My Orders', action: () => setView("orders") },
-                { id: 'wishlist', icon: Heart, label: 'My Wishlist', action: () => setView("wishlist") },
-                { id: 'notification', icon: Bell, label: 'Notification', action: () => {} },
-                { id: 'settings', icon: Settings, label: 'Settings', action: () => {} },
+                { id: 'orders', icon: Package, label: COPY.profile.orders.title, action: () => setView("orders") },
+                { id: 'wishlist', icon: Heart, label: COPY.profile.wishlist.title, action: () => setView("wishlist") },
+                { id: 'notification', icon: Bell, label: COPY.profile.menu.notification, action: () => {} },
+                { id: 'settings', icon: Settings, label: COPY.profile.menu.settings, action: () => {} },
             ]
         }
     ];
@@ -61,10 +63,12 @@ const Profile = () => {
         if (view === "orders" || (window.innerWidth >= 768 && view === "menu")) {
             return (
                 <div className="w-full">
-                    {window.innerWidth >= 768 && <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-6">My Orders</h2>}
+                    {window.innerWidth >= 768 && <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-6">{COPY.profile.orders.title}</h2>}
                     {ordersLoading ? (
-                        <div className="flex justify-center py-20">
-                            <Loader2 className="w-8 h-8 text-[#CA8385] animate-spin" />
+                        <div>
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <OrderSkeleton key={i} />
+                            ))}
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -73,20 +77,20 @@ const Profile = () => {
                                     <div className="flex justify-between items-start mb-4 md:mb-6">
                                         <div>
                                             <p className="font-['Playfair_Display'] text-lg md:text-xl font-bold text-[#343434] mb-1">{order.id}</p>
-                                            <p className="font-['DM_Sans'] text-xs md:text-sm text-[#999999]">Placed on {new Date(order.date).toLocaleDateString()}</p>
+                                            <p className="font-['DM_Sans'] text-xs md:text-sm text-[#999999]">{COPY.profile.orders.placedOn} {new Date(order.date).toLocaleDateString()}</p>
                                         </div>
                                         <span className="font-['DM_Sans'] text-xs md:text-sm font-bold text-[#CA8385] bg-[#FAF8F7] px-3 md:px-4 py-1.5 rounded-full">{order.status}</span>
                                     </div>
                                     <div className="flex justify-between items-center pt-4 md:pt-6 border-t border-[#EBEBEB]">
-                                        <p className="font-['DM_Sans'] text-sm md:text-base text-[#999999]">{order.items} {order.items === 1 ? 'Item' : 'Items'}</p>
+                                        <p className="font-['DM_Sans'] text-sm md:text-base text-[#999999]">{order.items} {order.items === 1 ? COPY.profile.orders.item : COPY.profile.orders.items}</p>
                                         <p className="font-['Playfair_Display'] text-lg md:text-2xl font-bold text-[#343434]">₹{order.total.toFixed(2)}</p>
                                     </div>
                                 </div>
                             )) : (
                                 <div className="text-center py-20 bg-white border border-[#EBEBEB] rounded-2xl">
                                     <Package size={48} className="mx-auto text-[#EBEBEB] mb-4" />
-                                    <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">No orders yet</h3>
-                                    <p className="font-['DM_Sans'] text-[#999999] text-sm">When you place an order, it will appear here.</p>
+                                    <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">{COPY.profile.orders.emptyState.title}</h3>
+                                    <p className="font-['DM_Sans'] text-[#999999] text-sm">{COPY.profile.orders.emptyState.description}</p>
                                 </div>
                             )}
                         </div>
@@ -98,7 +102,7 @@ const Profile = () => {
         if (view === "wishlist") {
             return (
                 <div className="w-full">
-                    {window.innerWidth >= 768 && <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-6">My Wishlist</h2>}
+                    {window.innerWidth >= 768 && <h2 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-6">{COPY.profile.wishlist.title}</h2>}
                     {wishlistProducts.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                             {wishlistProducts.map(product => <ProductCard key={product!.id} product={product!} />)}
@@ -106,8 +110,8 @@ const Profile = () => {
                     ) : (
                         <div className="text-center py-20 bg-white border border-[#EBEBEB] rounded-2xl">
                             <Heart size={48} className="mx-auto text-[#EBEBEB] mb-4" />
-                            <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">Wishlist is empty</h2>
-                            <p className="font-['DM_Sans'] text-sm text-[#999999]">Save your favorite pieces to view them later.</p>
+                            <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">{COPY.profile.wishlist.emptyState.title}</h2>
+                            <p className="font-['DM_Sans'] text-sm text-[#999999]">{COPY.profile.wishlist.emptyState.description}</p>
                         </div>
                     )}
                 </div>
@@ -143,10 +147,10 @@ const Profile = () => {
 
                 {/* Desktop Header */}
                 <div className="hidden md:flex items-center justify-between mb-12">
-                    <h1 className="font-['Playfair_Display'] text-4xl font-bold text-[#343434]">My Account</h1>
+                    <h1 className="font-['Playfair_Display'] text-4xl font-bold text-[#343434]">{COPY.profile.title}</h1>
                     <button onClick={handleLogout} className="flex items-center gap-2 px-6 py-3 rounded-full border border-[#EBEBEB] text-[#CA8385] font-['DM_Sans'] font-medium hover:bg-white transition-colors">
                         <LogOut size={18} />
-                        Sign Out
+                        {COPY.profile.signOut}
                     </button>
                 </div>
 
@@ -207,8 +211,8 @@ const Profile = () => {
 
                         {/* Mobile Logout (Hidden on Desktop) */}
                         <div className="md:hidden mt-12 mb-8 flex justify-center">
-                            <button onClick={handleLogout} className="font-['DM_Sans'] text-[15px] font-medium text-[#EF5050] active:scale-95 transition-transform">
-                                Logout
+                            <button onClick={handleLogout} className="font-['DM_Sans'] text-[15px] font-medium text-[#EF5050] active:scale-95 transition-transform px-6 py-3 min-h-[44px]">
+                                {COPY.profile.signOut}
                             </button>
                         </div>
                     </div>

@@ -6,6 +6,7 @@ import FormField from "@/components/FormField";
 import Input from "@/components/Input";
 import LoadingButton from "@/components/LoadingButton";
 import Icon from "@/components/Icon";
+import { COPY } from "@/config/constants";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -70,20 +71,20 @@ const Login = () => {
             <div className="w-full md:w-1/2 lg:w-2/5 min-h-screen bg-gradient-to-b md:bg-none from-[#F5F0EE] via-[#FAF8F7] to-white md:bg-white flex flex-col px-5 md:px-12 lg:px-20 z-0 pb-10">
                 <button
                     onClick={() => navigate(-1)}
-                    className="w-9 h-9 flex items-center justify-center mt-6 md:mt-12 mb-8 md:mb-12 active:scale-95 transition-transform hover:bg-[#F5F0EE] rounded-full"
+                    className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center mt-6 md:mt-12 mb-8 md:mb-12 active:scale-95 transition-transform hover:bg-[#F5F0EE] rounded-full focus:outline-none focus:ring-2 focus:ring-[#343434]"
                     aria-label="Go back"
                 >
                     <Icon name="back" size="w-6 h-6" />
                 </button>
 
                 <h1 className="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-[#343434] mb-8 md:mb-12">
-                    Hi, Welcome Back! 👋
+                    {COPY.auth.login.title}
                 </h1>
 
                 <form onSubmit={handleLogin} className="flex-1 flex flex-col" noValidate>
                     {/* Email field */}
                     <FormField
-                        label="Email"
+                        label={COPY.auth.login.emailLabel}
                         error={errors.email}
                         required
                     >
@@ -94,7 +95,7 @@ const Login = () => {
                                 setEmail(e.target.value);
                                 if (errors.email) setErrors({ ...errors, email: undefined });
                             }}
-                            placeholder="example@gmail.com"
+                            placeholder={COPY.auth.login.emailPlaceholder}
                             error={!!errors.email}
                             aria-label="Email address"
                             aria-required="true"
@@ -104,9 +105,9 @@ const Login = () => {
 
                     {/* Password field */}
                     <FormField
-                        label="Password"
+                        label={COPY.auth.login.passwordLabel}
                         error={errors.password}
-                        helpText="At least 6 characters"
+                        helpText={COPY.auth.login.passwordHelp}
                         required
                     >
                         <div className="relative">
@@ -117,7 +118,7 @@ const Login = () => {
                                     setPassword(e.target.value);
                                     if (errors.password) setErrors({ ...errors, password: undefined });
                                 }}
-                                placeholder="Enter your password"
+                                placeholder={COPY.auth.login.passwordPlaceholder}
                                 error={!!errors.password}
                                 aria-label="Password"
                                 aria-required="true"
@@ -126,7 +127,7 @@ const Login = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#343434] transition-colors p-1"
+                                className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#343434] transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#343434] rounded"
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 <Icon name="show" size="w-5 h-5" />
@@ -135,34 +136,34 @@ const Login = () => {
                     </FormField>
 
                     <div className="flex items-center justify-between mb-8 md:mb-12">
-                        <label className="flex items-center gap-2 text-sm md:text-base font-['DM_Sans'] text-[#343434] cursor-pointer hover:text-[#CA8385] transition-colors">
+                        <label className="flex items-center gap-2 text-sm md:text-base font-['DM_Sans'] text-[#343434] cursor-pointer hover:text-[#CA8385] transition-colors min-h-[44px] -my-2 py-2">
                             <input
                                 type="checkbox"
                                 className="w-4 h-4 md:w-5 md:h-5 accent-[#343434] rounded cursor-pointer"
                                 aria-label="Remember me"
                             />
-                            Remember Me
+                            {COPY.auth.login.rememberMe}
                         </label>
                         <Link
                             to="/forgot-password"
-                            className="text-sm md:text-base font-['DM_Sans'] text-[#343434] underline font-medium hover:text-[#CA8385] transition-colors"
+                            className="text-sm md:text-base font-['DM_Sans'] text-[#343434] underline font-medium hover:text-[#CA8385] transition-colors min-h-[44px] flex items-center -my-2 py-2"
                         >
-                            Forgot Password
+                            {COPY.auth.login.forgotPassword}
                         </Link>
                     </div>
 
                     <LoadingButton
                         type="submit"
                         loading={loading}
-                        loadingText="Logging in..."
-                        className="w-full mt-auto md:mt-4"
+                        loadingText={COPY.auth.login.loading}
+                        className="w-full mt-auto md:mt-4 min-h-[44px]"
                         disabled={loading}
                     >
-                        Login
+                        {COPY.auth.login.submit}
                     </LoadingButton>
 
                     <p className="text-center text-sm md:text-base font-['DM_Sans'] text-[#999999] mt-6 md:mt-8">
-                        Don't have an account? <Link to="/register" className="text-[#343434] font-bold hover:text-[#CA8385] transition-colors">Sign Up</Link>
+                        {COPY.auth.login.noAccount} <Link to="/register" className="text-[#343434] font-bold hover:text-[#CA8385] transition-colors min-h-[44px] inline-flex items-center -my-2 py-2">{COPY.auth.login.signUpLink}</Link>
                     </p>
                 </form>
             </div>

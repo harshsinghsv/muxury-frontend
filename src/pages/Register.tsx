@@ -6,6 +6,7 @@ import FormField from "@/components/FormField";
 import Input from "@/components/Input";
 import LoadingButton from "@/components/LoadingButton";
 import Icon from "@/components/Icon";
+import { COPY } from "@/config/constants";
 
 const Register = () => {
     const [name, setName] = useState("");
@@ -75,20 +76,20 @@ const Register = () => {
             <div className="w-full md:w-1/2 lg:w-2/5 min-h-screen bg-gradient-to-b md:bg-none from-[#F5F0EE] via-[#FAF8F7] to-white md:bg-white flex flex-col px-5 md:px-12 lg:px-20 z-0 pb-10 overflow-y-auto">
                 <button
                     onClick={() => navigate(-1)}
-                    className="w-9 h-9 flex items-center justify-center mt-6 md:mt-12 mb-8 md:mb-12 active:scale-95 transition-transform hover:bg-[#F5F0EE] rounded-full"
+                    className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center mt-6 md:mt-12 mb-8 md:mb-12 active:scale-95 transition-transform hover:bg-[#F5F0EE] rounded-full focus:outline-none focus:ring-2 focus:ring-[#343434]"
                     aria-label="Go back"
                 >
                     <Icon name="back" size="w-6 h-6" />
                 </button>
 
                 <h1 className="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-[#343434] mb-8 md:mb-12">
-                    Create Account 🎉
+                    {COPY.auth.register.title}
                 </h1>
 
                 <form onSubmit={handleRegister} className="flex-1 flex flex-col" noValidate>
                     {/* Name field */}
                     <FormField
-                        label="Full Name"
+                        label={COPY.auth.register.nameLabel}
                         error={errors.name}
                         required
                     >
@@ -99,7 +100,7 @@ const Register = () => {
                                 setName(e.target.value);
                                 if (errors.name) setErrors({ ...errors, name: undefined });
                             }}
-                            placeholder="John Doe"
+                            placeholder={COPY.auth.register.namePlaceholder}
                             error={!!errors.name}
                             aria-label="Full name"
                             aria-required="true"
@@ -109,7 +110,7 @@ const Register = () => {
 
                     {/* Email field */}
                     <FormField
-                        label="Email"
+                        label={COPY.auth.register.emailLabel}
                         error={errors.email}
                         required
                     >
@@ -120,7 +121,7 @@ const Register = () => {
                                 setEmail(e.target.value);
                                 if (errors.email) setErrors({ ...errors, email: undefined });
                             }}
-                            placeholder="example@gmail.com"
+                            placeholder={COPY.auth.register.emailPlaceholder}
                             error={!!errors.email}
                             aria-label="Email address"
                             aria-required="true"
@@ -130,9 +131,9 @@ const Register = () => {
 
                     {/* Password field */}
                     <FormField
-                        label="Password"
+                        label={COPY.auth.register.passwordLabel}
                         error={errors.password}
-                        helpText="At least 6 characters"
+                        helpText={COPY.auth.register.passwordHelp}
                         required
                     >
                         <div className="relative">
@@ -143,7 +144,7 @@ const Register = () => {
                                     setPassword(e.target.value);
                                     if (errors.password) setErrors({ ...errors, password: undefined });
                                 }}
-                                placeholder="Create a password"
+                                placeholder={COPY.auth.register.passwordPlaceholder}
                                 error={!!errors.password}
                                 aria-label="Password"
                                 aria-required="true"
@@ -152,7 +153,7 @@ const Register = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#343434] transition-colors p-1"
+                                className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#343434] transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#343434] rounded"
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 <Icon name="show" size="w-5 h-5" />
@@ -163,19 +164,19 @@ const Register = () => {
                     <LoadingButton
                         type="submit"
                         loading={loading}
-                        loadingText="Creating account..."
-                        className="w-full mt-auto md:mt-4"
+                        loadingText={COPY.auth.register.loading}
+                        className="w-full mt-auto md:mt-4 min-h-[44px]"
                         disabled={loading}
                     >
-                        Create an account
+                        {COPY.auth.register.submit}
                     </LoadingButton>
 
-                    <p className="text-center text-xs md:text-sm font-['DM_Sans'] text-[#999999] mt-6 md:mt-8 leading-relaxed px-4 md:px-0">
-                        By signing up you agree to our <span className="underline font-bold text-[#343434] cursor-pointer hover:text-[#CA8385]">Terms</span> and <span className="underline font-bold text-[#343434] cursor-pointer hover:text-[#CA8385]">Conditions of Use</span>
+                    <p className="text-center text-xs md:text-sm font-['DM_Sans'] text-[#999999] mt-6 md:mt-8 leading-relaxed px-4 md:px-0 min-h-[44px] flex items-center justify-center flex-wrap gap-x-1">
+                        {COPY.auth.register.terms} <span className="underline font-bold text-[#343434] cursor-pointer hover:text-[#CA8385]">{COPY.auth.register.termsLink}</span> {COPY.auth.register.and} <span className="underline font-bold text-[#343434] cursor-pointer hover:text-[#CA8385]">{COPY.auth.register.conditionsLink}</span>
                     </p>
 
                     <p className="text-center text-sm md:text-base font-['DM_Sans'] text-[#999999] mt-6 md:mt-8">
-                        Already have an account? <Link to="/login" className="text-[#343434] font-bold hover:text-[#CA8385] transition-colors">Sign In</Link>
+                        {COPY.auth.register.hasAccount} <Link to="/login" className="text-[#343434] font-bold hover:text-[#CA8385] transition-colors min-h-[44px] inline-flex items-center -my-2 py-2">{COPY.auth.register.signInLink}</Link>
                     </p>
                 </form>
             </div>

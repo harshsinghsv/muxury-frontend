@@ -63,24 +63,24 @@ export default function Header() {
     if (location.pathname === '/') {
       return (
         <header className="flex md:hidden items-center justify-between px-5 py-4 bg-transparent shrink-0">
-          <button className="w-9 h-9 flex flex-col justify-center gap-[5px] active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+          <button className="min-w-[44px] min-h-[44px] w-11 h-11 flex flex-col justify-center items-center gap-[5px] active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
             <span className="w-5 h-[2px] bg-[#343434] rounded-full" />
             <span className="w-5 h-[2px] bg-[#343434] rounded-full" />
             <span className="w-3 h-[2px] bg-[#343434] rounded-full" />
           </button>
-          <div className="flex items-center gap-3 relative">
-            <button onClick={() => navigate('/shop')} className="w-9 h-9 flex items-center justify-center relative active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+          <div className="flex items-center gap-2 relative">
+            <button onClick={() => navigate('/shop')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center relative active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
               <Icon name="buy" size="w-5 h-5" />
             </button>
-            <button onClick={() => navigate('/cart')} className="w-9 h-9 flex items-center justify-center relative active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+            <button onClick={() => navigate('/cart')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center relative active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
               <Icon name="bag" size="w-5 h-5" />
               {cartItemsCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#CA8385] rounded-full text-white text-[9px] flex items-center justify-center font-bold">
+                <span className="absolute top-1 right-1 w-4 h-4 bg-[#CA8385] rounded-full text-white text-[9px] flex items-center justify-center font-bold">
                   {cartItemsCount}
                 </span>
               )}
             </button>
-            <button onClick={() => navigate('/profile')} className="w-9 h-9 rounded-full overflow-hidden active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] flex items-center justify-center bg-[#FAF8F7] text-[#343434] font-medium">
+            <button onClick={() => navigate('/profile')} className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full overflow-hidden active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] flex items-center justify-center bg-[#FAF8F7] text-[#343434] font-medium">
               {isAuthenticated && user?.firstName ? (
                 <span>{user.firstName.charAt(0).toUpperCase()}</span>
               ) : (
@@ -102,9 +102,9 @@ export default function Header() {
 
       return (
         <header className="flex md:hidden items-center justify-between px-5 py-4 bg-transparent shrink-0">
-          <div className="w-9 h-9" />
+          <div className="min-w-[44px] min-h-[44px]" />
           <h1 className="font-['Playfair_Display'] text-lg font-medium text-[#343434]">{title}</h1>
-          <button onClick={() => navigate('/shop')} className="w-9 h-9 flex items-center justify-center active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+          <button onClick={() => navigate('/shop')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
             <Icon name="buy" size="w-5 h-5" />
           </button>
         </header>
@@ -120,11 +120,11 @@ export default function Header() {
 
     return (
       <header className="flex md:hidden items-center justify-between px-5 py-4 bg-transparent shrink-0">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 flex items-center justify-start active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+        <button onClick={() => navigate(-1)} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-start active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
           <Icon name="back" size="w-6 h-6" />
         </button>
         <h1 className="font-['Playfair_Display'] text-lg font-medium text-[#343434]">{title}</h1>
-        <div className="w-9 h-9"></div>
+        <div className="min-w-[44px] min-h-[44px]"></div>
       </header>
     );
   }

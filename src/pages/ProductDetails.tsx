@@ -4,6 +4,7 @@ import { useProduct } from "@/hooks/useProducts";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { COPY } from "@/config/constants";
 
 const ProductDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -32,13 +33,13 @@ const ProductDetails = () => {
     if (error || !product) {
         return (
             <div className="min-h-screen bg-[#FAFAFA] flex flex-col justify-center items-center pb-20">
-                <h1 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-2">Product Not Found</h1>
-                <p className="font-['DM_Sans'] text-[#999999] mb-6">This item may be out of stock or removed.</p>
+                <h1 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] mb-2">{COPY.productDetails.notFound.title}</h1>
+                <p className="font-['DM_Sans'] text-[#999999] mb-6">{COPY.productDetails.notFound.description}</p>
                 <button
                     onClick={() => navigate("/shop")}
-                    className="bg-[#343434] text-white px-6 py-3 rounded-full font-['DM_Sans'] text-sm hover:bg-black transition-colors"
+                    className="bg-[#343434] text-white px-6 py-3 min-h-[44px] rounded-full font-['DM_Sans'] text-sm hover:bg-black transition-colors"
                 >
-                    Back to Shop
+                    {COPY.productDetails.notFound.cta}
                 </button>
             </div>
         );
@@ -49,14 +50,14 @@ const ProductDetails = () => {
 
     const handleAddToCart = () => {
         if (needsSizeSelection && !selectedSize) {
-            toast.error("Please select a size");
+            toast.error(COPY.productDetails.toast.selectSize);
             return;
         }
         setIsAdding(true);
         setTimeout(() => {
             addToCart(product, 1, selectedSize || product.sizes[0] || "One Size");
             setIsAdding(false);
-            toast.success("Added to cart");
+            toast.success(COPY.productDetails.toast.addedToCart);
         }, 400);
     };
 
@@ -70,11 +71,11 @@ const ProductDetails = () => {
 
                         {/* Mobile Floating header overlaid on image */}
                         <div className="md:hidden absolute top-12 left-0 right-0 flex items-center justify-between px-5">
-                            <button onClick={() => navigate(-1)} className="w-9 h-9 bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm active:scale-95 transition-transform">
+                            <button onClick={() => navigate(-1)} className="w-11 h-11 bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm active:scale-95 transition-transform">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                             </button>
-                            <h1 className="font-['Playfair_Display'] text-lg font-medium text-white drop-shadow">Detail</h1>
-                            <button className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm active:scale-95 transition-transform">
+                            <h1 className="font-['Playfair_Display'] text-lg font-medium text-white drop-shadow">{COPY.productDetails.title}</h1>
+                            <button className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm active:scale-95 transition-transform">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             </button>
                         </div>
@@ -100,7 +101,7 @@ const ProductDetails = () => {
 
                     {/* Desktop breadcrumb & navigation */}
                     <div className="hidden md:flex items-center gap-2 font-['DM_Sans'] text-sm text-[#999999] mb-8">
-                        <button onClick={() => navigate('/shop')} className="hover:text-[#343434] transition-colors">Shop</button>
+                        <button onClick={() => navigate('/shop')} className="hover:text-[#343434] transition-colors">{COPY.productDetails.breadcrumbs.home}</button>
                         <span>/</span>
                         <span className="text-[#343434]">{product.category}</span>
                         <span>/</span>
@@ -110,7 +111,7 @@ const ProductDetails = () => {
                     <div className="flex items-start justify-between mb-1 md:mb-4">
                         <div>
                             <h2 className="font-['Playfair_Display'] text-xl md:text-4xl font-bold text-[#343434] md:mb-2">{product.name}</h2>
-                            <p className="font-['DM_Sans'] text-sm md:text-base text-[#999999]">Leziam Fashion</p>
+                            <p className="font-['DM_Sans'] text-sm md:text-base text-[#999999]">{COPY.productDetails.labels.brand}</p>
                         </div>
                     </div>
 
@@ -118,18 +119,18 @@ const ProductDetails = () => {
                         <div className="flex items-center gap-2">
                             <span className="font-['DM_Sans'] text-2xl md:text-3xl font-bold text-[#343434]">₹{product.price.toFixed(2)}</span>
                         </div>
-                        <div className="flex items-center gap-4 text-right">
+                        <div className="flex items-center gap-4 text-right min-h-[44px]">
                             <div className="flex items-center gap-1">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="#CA8385" stroke="#CA8385" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                                 <span className="font-['DM_Sans'] text-sm font-bold text-[#343434]">{product.rating}</span>
-                                <span className="font-['DM_Sans'] text-xs text-[#999999]">({product.reviewsCount} Reviews)</span>
+                                <span className="font-['DM_Sans'] text-xs text-[#999999]">({product.reviewsCount} {COPY.productDetails.labels.reviews})</span>
                             </div>
                         </div>
                     </div>
 
                     {needsSizeSelection && (
                         <>
-                            <p className="font-['DM_Sans'] text-sm md:text-base font-bold text-[#343434] mb-3">Size</p>
+                            <p className="font-['DM_Sans'] text-sm md:text-base font-bold text-[#343434] mb-3">{COPY.productDetails.labels.size}</p>
                             <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8 mb-6 md:mb-10">
                                 {/* Size Picker */}
                                 <div className="flex gap-3 flex-wrap">
@@ -146,7 +147,7 @@ const ProductDetails = () => {
 
                                 {/* Color Swatch */}
                                 <div className="flex gap-2 items-center md:ml-auto md:pl-8 md:border-l border-[#EBEBEB]">
-                                    <span className="font-['DM_Sans'] text-sm md:text-base font-bold text-[#343434] mr-2">Color</span>
+                                    <span className="font-['DM_Sans'] text-sm md:text-base font-bold text-[#343434] mr-2">{COPY.productDetails.labels.color}</span>
                                     {colors.map(color => (
                                         <button
                                             key={color}
@@ -162,7 +163,7 @@ const ProductDetails = () => {
                     )}
 
                     <div className="border-t border-[#EBEBEB] pt-6 md:pt-8 mb-6">
-                        <p className="font-['DM_Sans'] text-sm md:text-base font-bold text-[#343434] mb-3">Description</p>
+                        <p className="font-['DM_Sans'] text-sm md:text-base font-bold text-[#343434] mb-3">{COPY.productDetails.labels.description}</p>
                         <p className="font-['DM_Sans'] text-sm text-[#999999] leading-relaxed mb-6 md:mb-10">
                             {product.description}
                         </p>
@@ -173,10 +174,10 @@ const ProductDetails = () => {
                         <button
                             onClick={handleAddToCart}
                             disabled={isAdding || product.stock === 0}
-                            className="w-full h-14 md:text-base flex items-center justify-center gap-2 bg-[#343434] rounded-full text-white font-['DM_Sans'] font-medium active:scale-95 transition-transform hover:bg-black"
+                            className="w-full h-14 md:text-base flex items-center justify-center gap-2 bg-[#343434] rounded-full text-white font-['DM_Sans'] font-medium active:scale-95 transition-transform hover:bg-black focus:outline-none focus:ring-2 focus:ring-[#343434] focus:ring-offset-2 disabled:bg-[#999999] disabled:cursor-not-allowed"
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                            {isAdding ? "Adding..." : "Add to cart"}
+                            {isAdding ? COPY.productDetails.actions.adding : COPY.productDetails.actions.addToCart}
                         </button>
                     </div>
 
@@ -186,16 +187,16 @@ const ProductDetails = () => {
             {/* Mobile Sticky bottom bar */}
             <div className="md:hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-white border-t border-[#EBEBEB] px-5 py-4 flex items-center justify-between z-50">
                 <div className="flex flex-col">
-                    <span className="font-['DM_Sans'] text-xs text-[#999999]">Total Price</span>
+                    <span className="font-['DM_Sans'] text-xs text-[#999999]">{COPY.productDetails.labels.totalPrice}</span>
                     <span className="font-['Playfair_Display'] text-xl font-bold text-[#343434]">₹{product.price.toFixed(2)}</span>
                 </div>
                 <button
                     onClick={handleAddToCart}
                     disabled={isAdding || product.stock === 0}
-                    className="flex items-center justify-center gap-2 bg-[#343434] rounded-full px-8 py-3.5 text-white font-['DM_Sans'] font-medium text-sm active:scale-95 transition-transform"
+                    className="flex items-center justify-center gap-2 bg-[#343434] rounded-full px-8 py-3.5 min-h-[44px] text-white font-['DM_Sans'] font-medium text-sm active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-[#343434] focus:ring-offset-2 disabled:bg-[#999999] disabled:cursor-not-allowed"
                 >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                    {isAdding ? "Adding..." : "Add to cart"}
+                    {isAdding ? COPY.productDetails.actions.adding : COPY.productDetails.actions.addToCart}
                 </button>
             </div>
         </div>

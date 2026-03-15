@@ -4,9 +4,8 @@ import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
 import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/data/products";
-import { Loader2 } from "lucide-react";
-
-const CATEGORIES = ["All", "Outerwear", "Accessories", "Men's Fashion", "Women's Fashion", "Dresses", "Suits"];
+import ProductSkeleton from "@/components/ProductSkeleton";
+import { COPY } from "@/config/constants";
 
 const Shop = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -16,7 +15,7 @@ const Shop = () => {
     // Active category
     const categoryQuery = searchParams.get("category");
     const activeCategory = categoryQuery
-        ? CATEGORIES.find(c => c.toLowerCase() === categoryQuery.toLowerCase()) || "All"
+        ? COPY.shop.categories.find(c => c.toLowerCase() === categoryQuery.toLowerCase()) || "All"
         : "All";
 
     const { data: productsData, isLoading, error } = useProducts({
@@ -43,13 +42,14 @@ const Shop = () => {
             <aside className="hidden md:block w-64 flex-shrink-0">
                 <div className="sticky top-[100px]">
                     <div className="mb-6">
-                        <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-4">Categories</h3>
+                        <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-4">{COPY.shop.categories[0] === "All" ? "Categories" : COPY.shop.title}</h3>
                         <div className="flex flex-col gap-3">
-                            {CATEGORIES.map((cat) => (
+                            {COPY.shop.categories.map((cat) => (
                                 <button
                                     key={cat}
                                     onClick={() => handleCategoryClick(cat)}
-                                    className={`text-left font-['DM_Sans'] text-sm hover:text-[#CA8385] transition-colors ${activeCategory === cat ? "text-[#CA8385] font-bold" : "text-[#343434]"}`}
+                                    className={`text-left font-['DM_Sans'] text-sm hover:text-[#CA8385] transition-colors min-h-[44px] flex items-center ${activeCategory === cat ? "text-[#CA8385] font-bold" : "text-[#343434]"}`}
+                                    aria-current={activeCategory === cat ? 'page' : undefined}
                                 >
                                     {cat}
                                 </button>
@@ -58,10 +58,10 @@ const Shop = () => {
                     </div>
 
                     <div className="mb-6">
-                        <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-4">Sort By</h3>
+                        <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-4">{COPY.shop.filters.sortBy}</h3>
                         <div className="flex flex-col gap-3">
-                            {['Recommended', 'Newest', 'Lowest Price', 'Highest Price'].map(opt => (
-                                <label key={opt} className="flex items-center gap-3 cursor-pointer group">
+                            {COPY.shop.sortOptions.map(opt => (
+                                <label key={opt} className="flex items-center gap-3 cursor-pointer group min-h-[44px]">
                                     <div className="w-4 h-4 rounded-full border border-[#EBEBEB] flex items-center justify-center group-hover:border-[#CA8385] transition-colors">
                                         {opt === 'Recommended' && <div className="w-2 h-2 rounded-full bg-[#CA8385]" />}
                                     </div>
@@ -82,8 +82,8 @@ const Shop = () => {
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="Search..."
-                                className="w-full h-14 px-12 rounded-2xl border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] transition-colors"
+                                placeholder={COPY.shop.searchPlaceholder}
+                                className="w-full h-14 px-12 rounded-2xl border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] focus:ring-1 focus:ring-[#CA8385] transition-colors"
                             />
                             <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="11" cy="11" r="8"></circle>
@@ -110,11 +110,11 @@ const Shop = () => {
 
                     {/* Category Pills */}
                     <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 snap-x">
-                        {CATEGORIES.map((cat) => (
+                        {COPY.shop.categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => handleCategoryClick(cat)}
-                                className={`snap-start px-5 py-2.5 rounded-full font-['DM_Sans'] text-sm font-medium whitespace-nowrap transition-all ${activeCategory === cat
+                                className={`snap-start px-5 py-2.5 min-h-[44px] rounded-full font-['DM_Sans'] text-sm font-medium whitespace-nowrap transition-all focus:outline-none focus:ring-2 focus:ring-[#CA8385] focus:ring-offset-2 ${activeCategory === cat
                                     ? "bg-[#CA8385] text-white"
                                     : "bg-white border border-[#EBEBEB] text-[#343434]"
                                     }`}
@@ -129,8 +129,8 @@ const Shop = () => {
                 <div className="hidden md:block mb-8 relative max-w-md">
                     <input
                         type="text"
-                        placeholder="Search collection..."
-                        className="w-full h-12 px-12 rounded-full border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] transition-colors"
+                        placeholder={COPY.shop.desktopSearchPlaceholder}
+                        className="w-full h-12 px-12 rounded-full border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] focus:ring-1 focus:ring-[#CA8385] transition-colors"
                     />
                     <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
@@ -141,12 +141,14 @@ const Shop = () => {
                 {/* Results Grid */}
                 <main className="px-5 md:px-0">
                     <div className="flex items-center justify-between font-['DM_Sans'] text-xs font-bold tracking-widest uppercase text-[#343434] mb-4 md:mb-6">
-                        <h2>{activeCategory === "All" ? "All Products" : activeCategory} ({filteredProducts.length})</h2>
+                        <h2>{activeCategory === "All" ? COPY.shop.allProducts : activeCategory} ({filteredProducts.length})</h2>
                     </div>
 
                     {isLoading ? (
-                        <div className="flex justify-center items-center py-20">
-                            <Loader2 className="w-8 h-8 text-[#CA8385] animate-spin" />
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <ProductSkeleton key={i} />
+                            ))}
                         </div>
                     ) : error ? (
                         <div className="text-center py-20 text-red-500">Failed to load products. Please try again.</div>
@@ -160,13 +162,13 @@ const Shop = () => {
 
                     {filteredProducts.length === 0 && (
                         <div className="text-center py-20 bg-white md:bg-transparent rounded-3xl md:border md:border-[#EBEBEB] mt-8">
-                            <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">No items found</h2>
-                            <p className="font-['DM_Sans'] text-sm text-[#999999] mb-6">Try adjusting your filters.</p>
+                            <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">{COPY.shop.emptyState.title}</h2>
+                            <p className="font-['DM_Sans'] text-sm text-[#999999] mb-6">{COPY.shop.emptyState.description}</p>
                             <button
                                 onClick={() => handleCategoryClick("All")}
-                                className="bg-[#343434] text-white font-['DM_Sans'] text-sm font-medium px-6 py-3 rounded-full hover:bg-black transition-colors"
+                                className="bg-[#343434] text-white font-['DM_Sans'] text-sm font-medium px-6 py-3 min-h-[44px] rounded-full hover:bg-black transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
                             >
-                                View All Collection
+                                {COPY.shop.emptyState.cta}
                             </button>
                         </div>
                     )}
@@ -180,33 +182,33 @@ const Shop = () => {
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-white rounded-t-3xl p-6 transition-transform">
                         <div className="w-10 h-1 bg-[#EBEBEB] rounded-full mx-auto mb-4" />
                         <div className="flex items-center justify-between mb-5">
-                            <h2 className="font-['Playfair_Display'] text-xl font-medium text-[#343434]">Filter</h2>
-                            <button onClick={() => setIsFilterOpen(false)}>
+                            <h2 className="font-['Playfair_Display'] text-xl font-medium text-[#343434]">{COPY.shop.filters.title}</h2>
+                            <button onClick={() => setIsFilterOpen(false)} className="w-11 h-11 flex items-center justify-center rounded-full active:bg-[#F5F5F5] transition-colors">
                                 {/* Filter close empty or × icon */}
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
 
-                        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">Sort By</p>
+                        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">{COPY.shop.filters.sortBy}</p>
                         {/* Fake sort options for visual */}
                         <div className="flex flex-wrap gap-2 mb-6">
-                            {['Recommended', 'Newest', 'Lowest Price'].map(opt => (
-                                <button key={opt} className="px-4 py-2 border border-[#EBEBEB] rounded-full font-['DM_Sans'] text-sm text-[#343434]">{opt}</button>
+                            {COPY.shop.sortOptions.slice(0, 3).map(opt => (
+                                <button key={opt} className="px-4 py-2 min-h-[44px] border border-[#EBEBEB] rounded-full font-['DM_Sans'] text-sm text-[#343434] hover:border-[#CA8385] transition-colors">{opt}</button>
                             ))}
                         </div>
 
-                        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">Price Range</p>
+                        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">{COPY.shop.filters.priceRange}</p>
                         {/* Fake slider */}
                         <div className="w-full h-1 bg-[#EBEBEB] rounded-full relative mb-8 mt-4">
                             <div className="absolute left-1/4 right-1/4 h-full bg-[#CA8385] rounded-full">
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-white border-2 border-[#CA8385] rounded-full shadow-sm" />
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-white border-2 border-[#CA8385] rounded-full shadow-sm" />
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-white border-2 border-[#CA8385] rounded-full shadow-sm" />
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-6 h-6 bg-white border-2 border-[#CA8385] rounded-full shadow-sm" />
                             </div>
                         </div>
 
                         <div className="flex gap-3 mt-6">
-                            <button className="flex-1 h-14 border border-[#343434] rounded-full font-['DM_Sans'] font-medium text-[#343434] active:scale-95 transition-transform" onClick={() => setIsFilterOpen(false)}>Reset</button>
-                            <button className="flex-1 h-14 bg-[#343434] rounded-full font-['DM_Sans'] font-medium text-white active:scale-95 transition-transform" onClick={() => setIsFilterOpen(false)}>Apply</button>
+                            <button className="flex-1 h-14 border border-[#343434] rounded-full font-['DM_Sans'] font-medium text-[#343434] hover:bg-[#F5F5F5] active:scale-95 transition-all" onClick={() => setIsFilterOpen(false)}>{COPY.shop.filters.reset}</button>
+                            <button className="flex-1 h-14 bg-[#343434] rounded-full font-['DM_Sans'] font-medium text-white hover:bg-black active:scale-95 transition-all outline-none" onClick={() => setIsFilterOpen(false)}>{COPY.shop.filters.apply}</button>
                         </div>
                     </div>
                 </div>
