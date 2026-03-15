@@ -29,16 +29,7 @@ const Profile = () => {
         navigate("/");
     };
 
-    // Helper component for mobile view headers
-    const MobileHeader = ({ title, onBack }: { title: string, onBack: () => void }) => (
-        <div className="md:hidden flex items-center justify-between px-5 pt-8 mb-6">
-            <button onClick={onBack} className="w-10 h-10 border border-[#EBEBEB] rounded-full flex items-center justify-center bg-white active:scale-95 transition-transform">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            </button>
-            <h1 className="font-['Playfair_Display'] text-xl font-bold text-[#343434]">{title}</h1>
-            <div className="w-10"></div>
-        </div>
-    );
+
 
     // Sidebar navigation sections corresponding to reference design
     const navSections = [
@@ -131,7 +122,7 @@ const Profile = () => {
     if (view === "orders" && window.innerWidth < 768) {
         return (
             <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-24 z-0">
-                <MobileHeader title="My Orders" onBack={() => setView("menu")} />
+                {/* Mobile Header removed as global App <Header/> renders for this route now */}
                 <main className="px-5">{renderContent()}</main>
             </div>
         );
@@ -140,7 +131,7 @@ const Profile = () => {
     if (view === "wishlist" && window.innerWidth < 768) {
         return (
             <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-24 z-0">
-                <MobileHeader title="My Wishlist" onBack={() => setView("menu")} />
+                {/* Mobile Header removed as global App <Header/> renders for this route now */}
                 <main className="px-5">{renderContent()}</main>
             </div>
         );
