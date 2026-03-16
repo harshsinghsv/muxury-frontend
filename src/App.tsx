@@ -105,7 +105,6 @@ const AppContent = () => {
           <Route path="/collections" element={<Shop />} />
           <Route path="/wishlist" element={<Profile />} />
           <Route path="/orders" element={<Profile />} />
-          <Route path="/about" element={<Index />} />
           <Route path="/contact" element={<Index />} />
 
           {/* 404 catch-all */}
