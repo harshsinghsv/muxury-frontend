@@ -101,10 +101,10 @@ export default function Header() {
       if (location.pathname === '/orders') title = 'My Orders';
 
       return (
-        <header className="flex md:hidden items-center justify-between px-5 py-4 bg-transparent shrink-0">
+        <header className="flex md:hidden items-center justify-between px-5 py-4 bg-transparent shrink-0 relative">
           <div className="min-w-[44px] min-h-[44px]" />
-          <h1 className="font-['Playfair_Display'] text-lg font-medium text-[#343434]">{title}</h1>
-          <button onClick={() => navigate('/shop')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+          <h1 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] absolute left-0 right-0 text-center pointer-events-none">{title}</h1>
+          <button onClick={() => navigate('/shop')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] hover:text-[#CA8385]">
             <Icon name="buy" size="w-5 h-5" />
           </button>
         </header>
@@ -119,11 +119,11 @@ export default function Header() {
     if (location.pathname.startsWith('/change-password')) title = 'Change Password';
 
     return (
-      <header className="flex md:hidden items-center justify-between px-5 py-4 bg-transparent shrink-0">
-        <button onClick={() => navigate(-1)} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-start active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+      <header className="flex md:hidden items-center justify-between px-5 py-4 bg-transparent shrink-0 relative">
+        <button onClick={() => navigate(-1)} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-start active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] hover:text-[#CA8385] relative z-10">
           <Icon name="back" size="w-6 h-6" />
         </button>
-        <h1 className="font-['Playfair_Display'] text-lg font-medium text-[#343434]">{title}</h1>
+        <h1 className="font-['Playfair_Display'] text-2xl font-bold text-[#343434] absolute left-0 right-0 text-center pointer-events-none">{title}</h1>
         <div className="min-w-[44px] min-h-[44px]"></div>
       </header>
     );
