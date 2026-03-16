@@ -112,7 +112,7 @@ const Cart = () => {
 
                         {/* Order Summary (Desktop Side / Mobile Sticky Bottom) */}
                         <div className="md:w-1/3 flex-shrink-0">
-                            <div className="sticky top-[120px] bg-white rounded-t-3xl md:rounded-3xl border border-[#EBEBEB] p-5 md:p-8 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:shadow-sm z-20 fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] md:static md:w-auto md:translate-x-0">
+                            <div className="sticky top-[120px] bg-white rounded-t-3xl md:rounded-3xl border border-[#EBEBEB] p-5 md:p-8 shadow-sm mb-6 mt-4 md:mt-0 z-20">
                                 <h3 className="hidden md:block font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-6">{COPY.cart.summary.title}</h3>
 
                                 <div className="hidden md:flex items-center justify-between mb-4">
