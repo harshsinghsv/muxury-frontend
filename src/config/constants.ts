@@ -160,7 +160,7 @@ export const COPY = {
     },
     auth: {
         login: {
-            title: "Hi, Welcome Back! 👋",
+            title: "Hi, Welcome Back!",
             emailLabel: "Email",
             passwordLabel: "Password",
             emailPlaceholder: "example@gmail.com",
@@ -174,9 +174,9 @@ export const COPY = {
             signUpLink: "Sign Up"
         },
         register: {
-            title: "Create Account 🎉",
+            title: "Create Account",
             nameLabel: "Full Name",
-            namePlaceholder: "John Doe",
+            namePlaceholder: "Harsh",
             emailLabel: "Email",
             emailPlaceholder: "example@gmail.com",
             passwordLabel: "Password",
