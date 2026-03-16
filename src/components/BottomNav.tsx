@@ -47,12 +47,12 @@ export default function BottomNav() {
     if (!showNav) return null;
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 w-full md:hidden bg-white/95 backdrop-blur-md border-t border-[#EBEBEB] flex items-center justify-between px-6 py-2 pb-6 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+        <nav className="fixed bottom-0 left-0 right-0 w-full md:hidden bg-white/95 backdrop-blur-md border-t border-[#EBEBEB] flex items-center justify-between px-6 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
                     onClick={() => navigate(tab.path)}
-                    className={`flex flex-col items-center justify-center gap-1.5 min-w-[50px] min-h-[50px] [-webkit-tap-highlight-color:transparent] transition-colors relative ${activeTab === tab.id ? 'text-[#343434]' : 'text-[#999999] hover:text-[#CA8385]'}`}
+                    className={`flex items-center justify-center w-12 h-12 [-webkit-tap-highlight-color:transparent] transition-colors relative ${activeTab === tab.id ? 'text-[#343434]' : 'text-[#999999] hover:text-[#CA8385]'}`}
                 >
                     {tab.icon}
                     
@@ -61,11 +61,6 @@ export default function BottomNav() {
                             {cartItemsCount}
                         </span>
                     )}
-                    
-                    {/* Active dot indicator */}
-                    <span 
-                        className={`w-1.5 h-1.5 rounded-full bg-[#CA8385] transition-all absolute -bottom-1 ${activeTab === tab.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`} 
-                    />
                 </button>
             ))}
         </nav>
