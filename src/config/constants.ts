@@ -29,6 +29,7 @@ export const COPY = {
             cta: "Get Now"
         },
         sections: {
+            categories: "Shop by Category",
             popular: "Most Popular",
             seeAll: "See All"
         }
