@@ -152,7 +152,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         // Debounce sync to avoid too many requests
         const syncTimer = setTimeout(performSync, 500);
         return () => clearTimeout(syncTimer);
-    }, [state.items]);
+    }, [state.items, state.isSyncing]);
 
     const addToCart = (product: Product, quantity: number, selectedSize: string) => {
         dispatch({ type: "ADD_TO_CART", payload: { product, quantity, selectedSize } });

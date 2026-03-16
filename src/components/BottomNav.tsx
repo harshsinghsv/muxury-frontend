@@ -47,27 +47,25 @@ export default function BottomNav() {
     if (!showNav) return null;
 
     return (
-        <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] md:hidden bg-white border-t border-[#EBEBEB] flex items-center justify-around px-4 py-3 pb-6 z-40">
+        <nav className="fixed bottom-0 left-0 right-0 w-full md:hidden bg-white/95 backdrop-blur-md border-t border-[#EBEBEB] flex items-center justify-between px-6 py-2 pb-6 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
             {tabs.map(tab => (
                 <button
                     key={tab.id}
                     onClick={() => navigate(tab.path)}
-                    className={`flex flex-col items-center gap-1 [-webkit-tap-highlight-color:transparent] ${activeTab === tab.id ? 'text-[#343434]' : 'text-[#999999]'}`}
+                    className={`flex flex-col items-center justify-center gap-1.5 min-w-[50px] min-h-[50px] [-webkit-tap-highlight-color:transparent] transition-colors relative ${activeTab === tab.id ? 'text-[#343434]' : 'text-[#999999] hover:text-[#CA8385]'}`}
                 >
-                    {tab.id === 'cart'
-                        ? <div className="bg-[#343434] rounded-full p-3 -mt-6 shadow-xl relative text-white">
-                            {tab.icon}
-                            {cartItemsCount > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#CA8385] rounded-full text-white text-[9px] flex items-center justify-center font-bold">
-                                    {cartItemsCount}
-                                </span>
-                            )}
-                        </div>
-                        : tab.icon
-                    }
-                    {activeTab === tab.id && tab.id !== 'cart' && (
-                        <span className="w-1 h-1 rounded-full bg-[#CA8385]" />
+                    {tab.icon}
+                    
+                    {tab.id === 'cart' && cartItemsCount > 0 && (
+                        <span className="absolute top-1 right-2 w-[18px] h-[18px] bg-[#CA8385] rounded-full text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white">
+                            {cartItemsCount}
+                        </span>
                     )}
+                    
+                    {/* Active dot indicator */}
+                    <span 
+                        className={`w-1.5 h-1.5 rounded-full bg-[#CA8385] transition-all absolute -bottom-1 ${activeTab === tab.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`} 
+                    />
                 </button>
             ))}
         </nav>
