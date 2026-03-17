@@ -38,9 +38,17 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "radiant-cart-items";
+const GUEST_SESSION_KEY = "muxury_guest_session_id";
 const TAX_RATE = 0.1;
 const FREE_SHIPPING_THRESHOLD = 100;
 const SHIPPING_COST = 15;
+
+/** Ensure a guest session ID exists in localStorage (created on first cart add) */
+function ensureGuestSession(): void {
+    if (!localStorage.getItem(GUEST_SESSION_KEY)) {
+        localStorage.setItem(GUEST_SESSION_KEY, crypto.randomUUID());
+    }
+}
 
 function cartReducer(state: CartState, action: CartAction): CartState {
     switch (action.type) {
@@ -155,6 +163,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }, [state.items]);
 
     const addToCart = (product: Product, quantity: number, selectedSize: string) => {
+        ensureGuestSession();
         dispatch({ type: "ADD_TO_CART", payload: { product, quantity, selectedSize } });
     };
 

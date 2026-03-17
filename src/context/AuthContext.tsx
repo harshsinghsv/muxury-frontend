@@ -1,9 +1,12 @@
 /**
  * AuthContext — wired to real backend API.
  *
- * Zero UI changes: same context shape as before.
- * Implementation change only: login/register/logout now call real endpoints.
- * Tokens stored via tokenStorage (localStorage), 15-min access + 7-day refresh.
+ * Supports:
+ *  - Email + Password login
+ *  - Phone + OTP login (2-step)
+ *  - Registration with dual verification (email + phone)
+ *  - OTP verification, resend OTP, resend email
+ *  - Guest session tracking for cart merge
  */
 
 import React, {
@@ -39,15 +42,35 @@ type AuthAction =
     | { type: 'SET_LOADING'; payload: boolean };
 
 interface AuthContextType extends AuthState {
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string) => Promise<void>;
+    loginEmail: (email: string) => Promise<void>;
+    loginEmailSendOtp: (email: string) => Promise<void>;
+    loginEmailVerifyOtp: (email: string, otp: string) => Promise<void>;
+    loginPhoneSendOtp: (phone: string) => Promise<void>;
+    loginPhoneVerifyOtp: (phone: string, otp: string) => Promise<void>;
     register: (data: {
         firstName: string;
         lastName: string;
         email: string;
         password: string;
-        phone?: string;
-    }) => Promise<{ message: string }>;
+        phone: string;
+    }) => Promise<{ userId: string; message: string }>;
+    verifyPhone: (userId: string, otp: string) => Promise<{ bothVerified: boolean }>;
+    resendOtp: (userId: string) => Promise<void>;
+    resendEmail: (email: string) => Promise<void>;
     logout: () => Promise<void>;
+}
+
+// ─── Guest Session Helper ────────────────────────────────────────────────────
+
+const GUEST_SESSION_KEY = 'muxury_guest_session_id';
+
+export function getGuestSessionId(): string | null {
+    return localStorage.getItem(GUEST_SESSION_KEY);
+}
+
+export function clearGuestSession(): void {
+    localStorage.removeItem(GUEST_SESSION_KEY);
 }
 
 // ─── Reducer ─────────────────────────────────────────────────────────────────
@@ -90,8 +113,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const { data } = await api.get('/auth/me');
                 dispatch({ type: 'SET_USER', payload: data.data.user });
             } catch {
-                // Token invalid or expired — the interceptor handles refresh.
-                // If it fails again, clear and treat as logged out.
                 tokenStorage.clear();
                 dispatch({ type: 'LOGOUT' });
             }
@@ -99,19 +120,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         restoreSession();
     }, []);
 
-    // ─── Login ────────────────────────────────────────────────────────────────
+    // ─── Login — Email + OTP (Step 1: Send OTP) ───────────────────────────
 
-    const login = useCallback(async (email: string, password: string) => {
+    const loginEmailSendOtp = useCallback(async (email: string) => {
+        try {
+            await api.post('/auth/login-email/send-otp', { email });
+        } catch (err: any) {
+            const message = err?.response?.data?.message || 'Failed to send login code.';
+            throw new Error(message);
+        }
+    }, []);
+
+    // Backward compat aliases
+    const loginEmail = loginEmailSendOtp;
+    const login = loginEmailSendOtp;
+
+    // ─── Login — Email + OTP (Step 2: Verify OTP) ─────────────────────────
+
+    const loginEmailVerifyOtp = useCallback(async (email: string, otp: string) => {
         dispatch({ type: 'SET_LOADING', payload: true });
         try {
-            const { data } = await api.post('/auth/login', { email, password });
+            const { data } = await api.post('/auth/login-email/verify-otp', { email, otp });
             const { user, accessToken, refreshToken } = data.data;
             tokenStorage.setTokens(accessToken, refreshToken);
             dispatch({ type: 'SET_USER', payload: user });
         } catch (err: any) {
             dispatch({ type: 'SET_LOADING', payload: false });
-            const message = err?.response?.data?.message || 'Login failed. Please try again.';
+            throw new Error(err?.response?.data?.message || 'OTP verification failed.');
+        }
+    }, []);
+
+    // ─── Login — Phone + OTP (Step 1) ─────────────────────────────────────────
+
+    const loginPhoneSendOtp = useCallback(async (phone: string) => {
+        try {
+            await api.post('/auth/login-phone/send-otp', { phone });
+        } catch (err: any) {
+            const message = err?.response?.data?.message || 'Failed to send OTP.';
             throw new Error(message);
+        }
+    }, []);
+
+    // ─── Login — Phone + OTP (Step 2) ─────────────────────────────────────────
+
+    const loginPhoneVerifyOtp = useCallback(async (phone: string, otp: string) => {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        try {
+            const { data } = await api.post('/auth/login-phone/verify-otp', { phone, otp });
+            const { user, accessToken, refreshToken } = data.data;
+            tokenStorage.setTokens(accessToken, refreshToken);
+            dispatch({ type: 'SET_USER', payload: user });
+        } catch (err: any) {
+            dispatch({ type: 'SET_LOADING', payload: false });
+            throw new Error(err?.response?.data?.message || 'OTP verification failed.');
         }
     }, []);
 
@@ -123,41 +184,81 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             lastName: string;
             email: string;
             password: string;
-            phone?: string;
+            phone: string;
         }) => {
             dispatch({ type: 'SET_LOADING', payload: true });
             try {
-                const { data: res } = await api.post('/auth/register', data);
+                const guestSessionId = getGuestSessionId();
+                const { data: res } = await api.post('/auth/register', {
+                    ...data,
+                    ...(guestSessionId && { guestSessionId }),
+                });
                 dispatch({ type: 'SET_LOADING', payload: false });
-                
-                // If auto-logged in (e.g. development mode bypasses email verification)
-                if (res.data?.accessToken && res.data?.refreshToken && res.data?.user) {
-                    tokenStorage.setTokens(res.data.accessToken, res.data.refreshToken);
-                    dispatch({ type: 'SET_USER', payload: res.data.user });
-                }
-                
-                return { message: res.message };
+                return { userId: res.data.userId, message: res.message };
             } catch (err: any) {
                 dispatch({ type: 'SET_LOADING', payload: false });
                 let message = err?.response?.data?.message || 'Registration failed. Please try again.';
-                
+
                 // Format detailed validation errors if they exist
                 if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
                     message = err.response.data.errors.map((e: any) => e.message).join(' | ');
                 }
-                
+
                 throw new Error(message);
             }
         },
         []
     );
 
+    // ─── Verify Phone OTP ─────────────────────────────────────────────────────
+
+    const verifyPhone = useCallback(async (userId: string, otp: string) => {
+        try {
+            const guestSessionId = getGuestSessionId();
+            const { data } = await api.post('/auth/verify-phone', {
+                userId,
+                otp,
+                ...(guestSessionId && { guestSessionId }),
+            });
+
+            const { bothVerified } = data.data;
+
+            // If both verified, clear guest session
+            if (bothVerified) {
+                clearGuestSession();
+            }
+
+            return { bothVerified };
+        } catch (err: any) {
+            throw new Error(err?.response?.data?.message || 'OTP verification failed.');
+        }
+    }, []);
+
+    // ─── Resend Phone OTP ─────────────────────────────────────────────────────
+
+    const resendOtp = useCallback(async (userId: string) => {
+        try {
+            await api.post('/auth/resend-phone-otp', { userId });
+        } catch (err: any) {
+            throw new Error(err?.response?.data?.message || 'Failed to resend OTP.');
+        }
+    }, []);
+
+    // ─── Resend Email Verification ────────────────────────────────────────────
+
+    const resendEmail = useCallback(async (email: string) => {
+        try {
+            await api.post('/auth/resend-email', { email });
+        } catch (err: any) {
+            throw new Error(err?.response?.data?.message || 'Failed to resend email.');
+        }
+    }, []);
+
     // ─── Logout ───────────────────────────────────────────────────────────────
 
     const logout = useCallback(async () => {
         const refreshToken = tokenStorage.getRefresh();
         try {
-            // Best-effort: revoke refresh token on server
             if (refreshToken) {
                 await api.post('/auth/logout', { refreshToken });
             }
@@ -170,7 +271,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ ...state, login, register, logout }}>
+        <AuthContext.Provider value={{
+            ...state,
+            login,
+            loginEmail,
+            loginEmailSendOtp,
+            loginEmailVerifyOtp,
+            loginPhoneSendOtp,
+            loginPhoneVerifyOtp,
+            register,
+            verifyPhone,
+            resendOtp,
+            resendEmail,
+            logout,
+        }}>
             {children}
         </AuthContext.Provider>
     );
