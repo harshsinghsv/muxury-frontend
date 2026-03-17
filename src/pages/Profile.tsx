@@ -18,6 +18,7 @@ const Profile = () => {
     const { user, logout } = useAuth();
     const { items: wishlistIds } = useWishlist();
     const [view, setView] = useState<ViewState>("menu");
+    const { data: realOrders, isLoading: ordersLoading } = useOrders();
 
     if (!user) {
         navigate("/login");
@@ -55,7 +56,6 @@ const Profile = () => {
         }
     ];
 
-    const { data: realOrders, isLoading: ordersLoading } = useOrders();
     const ordersList = realOrders || [];
 
     // Main content area renderer

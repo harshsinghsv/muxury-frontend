@@ -95,7 +95,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         // Debounce sync to avoid too many requests
         const syncTimer = setTimeout(performSync, 500);
         return () => clearTimeout(syncTimer);
-    }, [state.items]);
+    }, [state.items, state.isSyncing]);
 
     const addToWishlist = (productId: string) => {
         dispatch({ type: "ADD_TO_WISHLIST", payload: productId });

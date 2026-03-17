@@ -76,7 +76,7 @@ const Shop = () => {
             {/* Main Content Area */}
             <div className="flex-1 min-w-0">
                 {/* Mobile Header & Sticky Filter Bar */}
-                <div className="md:hidden bg-[#FAFAFA] pt-2 pb-3 mb-2 px-5 sticky top-[68px] z-20">
+                <div className="md:hidden bg-[#FAFAFA] pb-3 mb-2 px-5 sticky top-0 z-20 pt-1 -mt-2">
                     {/* Search / Filter Row */}
                     <div className="mb-4">
                         <div className="relative">

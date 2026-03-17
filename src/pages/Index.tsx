@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import { useProducts } from "@/hooks/useProducts";
@@ -5,13 +6,26 @@ import { useAuth } from "@/context/AuthContext";
 import { COPY } from "@/config/constants";
 import ProductSkeleton from "@/components/ProductSkeleton";
 
-// Using existing image as a proxy for the promo image
 import productBag from "@/assets/product-bag.jpg";
+import productDress1 from "@/assets/product-dress-1.jpg";
+import productSuit1 from "@/assets/product-suit-1.jpg";
+import productSunglasses from "@/assets/product-sunglasses.jpg";
+import productDress2 from "@/assets/product-dress-2.jpg";
+import productSuit2 from "@/assets/product-suit-2.jpg";
 
 const Index = () => {
   const { user } = useAuth();
   const { data: productsData, isLoading, error } = useProducts({ isFeatured: true });
   const featuredProducts = (productsData || []).slice(0, 4);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { current } = scrollRef;
+      const scrollAmount = direction === 'left' ? -current.offsetWidth / 2 : current.offsetWidth / 2;
+      current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   const greeting = user?.firstName ? `${COPY.home.hero.greeting} ${user.firstName}` : COPY.home.hero.guestGreeting;
 
@@ -23,22 +37,60 @@ const Index = () => {
         {COPY.home.hero.title}
       </h1>
 
-      {/* Promo carousel */}
-      <div className="rounded-3xl bg-[#F0EDED] px-5 md:px-10 pt-5 md:pt-10 overflow-hidden relative min-h-[160px] md:min-h-[240px] mb-4 md:mb-8 flex flex-col justify-center">
-        <p className="font-['Playfair_Display'] text-2xl md:text-4xl font-bold text-[#CA8385]">{COPY.home.promo.discount}</p>
-        <p className="font-['DM_Sans'] text-sm md:text-lg text-[#343434] md:mt-2 relative z-10">{COPY.home.promo.description}</p>
-        <p className="font-['DM_Sans'] text-[10px] md:text-sm text-[#999999] md:mt-1 relative z-10">{COPY.home.promo.validUntil}</p>
-        <button className="mt-4 md:mt-6 bg-[#CA8385] text-white text-xs md:text-sm font-['DM_Sans'] px-6 md:px-8 min-h-[44px] rounded-full mb-6 md:mb-10 active:scale-95 transition-transform w-max relative z-10 hover:bg-[#a56769] focus:ring-2 focus:ring-[#CA8385] focus:outline-none focus:ring-offset-2">
-          {COPY.home.promo.cta}
+      {/* Categories Row (Myntra-style) */}
+      <div className="mb-10 md:mb-16 mt-6 md:mt-10 relative">
+        <h2 className="font-['Playfair_Display'] text-xl md:text-2xl font-bold text-[#343434] mb-6 md:mb-8">{COPY.home.sections.categories || "Shop by Category"}</h2>
+        
+        {/* Desktop left arrow */}
+        <button 
+          onClick={() => scroll('left')} 
+          className="hidden md:flex absolute left-[-20px] top-[60%] -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md items-center justify-center text-[#343434] hover:text-[#CA8385] opacity-0 group-hover:opacity-100 transition-opacity z-10 border border-[#EBEBEB] focus:outline-none"
+          aria-label="Scroll left"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
-        <img src={productBag} className="absolute right-0 bottom-0 h-28 md:h-56 object-contain mix-blend-multiply md:mr-10" alt="Promo" />
-      </div>
 
-      {/* Carousel dots */}
-      <div className="flex justify-center gap-2 mb-6 md:mb-12">
-        <span className="w-6 h-2 bg-[#CA8385] rounded-full" />
-        <span className="w-2 h-2 bg-[#EBEBEB] rounded-full" />
-        <span className="w-2 h-2 bg-[#EBEBEB] rounded-full" />
+        <div className="group relative">
+          <div ref={scrollRef} className="flex overflow-x-auto hide-scrollbar gap-5 md:gap-10 pb-4 snap-x">
+            {[
+              { name: "Outerwear", image: productSuit1 },
+              { name: "Accessories", image: productSunglasses },
+              { name: "Men's Fashion", image: productSuit2 },
+              { name: "Women's Fashion", image: productDress1 },
+              { name: "Dresses", image: productDress2 },
+              { name: "Suits", image: productSuit1 },
+              { name: "Bags", image: productBag },
+            ].map((category, idx) => (
+              <Link 
+                key={idx} 
+                to={`/shop?category=${encodeURIComponent(category.name.toLowerCase())}`} 
+                className="flex flex-col items-center gap-3 group/item min-w-[80px] md:min-w-[110px] shrink-0 snap-center"
+              >
+                <div className="w-[80px] h-[80px] md:w-[110px] md:h-[110px] rounded-full overflow-hidden p-[2px] border border-[#EBEBEB] group-hover/item:border-[#CA8385] transition-colors shadow-sm bg-white">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-[#FAF8F7] relative">
+                    <img 
+                      src={category.image} 
+                      alt={category.name} 
+                      className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-700" 
+                    />
+                  </div>
+                </div>
+                <span className="font-['DM_Sans'] text-xs md:text-sm text-center text-[#343434] group-hover/item:text-[#CA8385] transition-colors font-medium">
+                  {category.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop right arrow */}
+          <button 
+            onClick={() => scroll('right')} 
+            className="hidden md:flex absolute right-[-20px] top-[40%] -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md items-center justify-center text-[#343434] hover:text-[#CA8385] opacity-0 group-hover:opacity-100 transition-opacity z-10 border border-[#EBEBEB] focus:outline-none"
+            aria-label="Scroll right"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
       </div>
 
       {/* Section header */}
