@@ -64,6 +64,7 @@ const AppContent = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/enter-otp" element={<EnterOTP />} />
+          <Route path="/verify-otp" element={<EnterOTP />} />
           <Route path="/create-new-password" element={<CreateNewPassword />} />
 
           {/* Admin Routes (Protected) */}

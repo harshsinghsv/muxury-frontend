@@ -1,47 +1,53 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import FormField from "@/components/FormField";
 import Input from "@/components/Input";
 import LoadingButton from "@/components/LoadingButton";
 import Icon from "@/components/Icon";
-import { COPY } from "@/config/constants";
 
 const Login = () => {
-    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState (false);
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+    const [errors, setErrors] = useState<{ phone?: string; password?: string }>({});
 
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useAuth();
+    // If redirected from a protected page (e.g. /checkout), restore ?next=
+    const from = (location.state as any)?.from?.pathname || "/";
 
-    const validateForm = () => {
-        const newErrors: typeof errors = {};
-        if (!email) newErrors.email = "Email is required";
-        else if (!/^\S+@\S+\.\S+$/.test(email)) newErrors.email = "Please enter a valid email";
-        if (!password) newErrors.password = "Password is required";
-        else if (password.length < 6) newErrors.password = "Password must be at least 6 characters";
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+    // ─── Validation ───────────────────────────────────────────────────────
+
+    const validate = () => {
+        const e: typeof errors = {};
+        if (!phone) e.phone = "Phone number is required";
+        else if (!/^[6-9]\d{9}$/.test(phone)) e.phone = "Enter a valid 10-digit Indian mobile number";
+        if (!password) e.password = "Password is required";
+        setErrors(e);
+        return Object.keys(e).length === 0;
     };
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!validateForm()) return;
+    // ─── Submit ───────────────────────────────────────────────────────────
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!validate()) return;
         setLoading(true);
         try {
-            await login(email, password);
-            navigate("/");
-        } catch (error: any) {
-            if (error.message.toLowerCase().includes("invalid email or password")) {
-                toast.info("Account not found. Please sign up first.");
-                navigate("/register");
+            await login(phone, password);
+            navigate(`/verify-otp?purpose=login&phone=${encodeURIComponent(phone)}&next=${encodeURIComponent(from)}`);
+        } catch (err: any) {
+            const msg = err.message || "Login failed";
+            // Account not found → go to register
+            if (msg.toLowerCase().includes("invalid") || msg.toLowerCase().includes("no account")) {
+                toast.error("No account found with this phone number.");
+                setTimeout(() => navigate("/register"), 1500);
             } else {
-                toast.error(error.message || "Invalid credentials");
+                toast.error(msg);
             }
         } finally {
             setLoading(false);
@@ -50,17 +56,19 @@ const Login = () => {
 
     return (
         <div className="min-h-screen flex md:flex-row bg-[#FAFAFA]">
-            {/* Desktop Editorial Image Side */}
+            {/* Editorial Side */}
             <div className="hidden md:block md:w-1/2 lg:w-3/5 relative bg-[#e0dede]">
                 <img
                     src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200"
-                    alt="Muxury Editorial - Refined minimalism"
+                    alt="Muxury Editorial"
                     className="absolute inset-0 w-full h-full object-cover object-center grayscale-[20%]"
                     loading="lazy"
                 />
-                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="absolute inset-0 bg-black/10" />
                 <div className="absolute inset-0 p-12 lg:p-24 flex flex-col justify-between text-white">
-                    <Link to="/" className="font-['Playfair_Display'] text-3xl font-bold tracking-wide mix-blend-difference z-10" aria-label="Muxury Home">Muxury.</Link>
+                    <Link to="/" className="font-['Playfair_Display'] text-3xl font-bold tracking-wide mix-blend-difference z-10" aria-label="Muxury Home">
+                        Muxury.
+                    </Link>
                     <h2 className="font-['Playfair_Display'] text-5xl lg:text-7xl leading-tight max-w-lg mb-8 drop-shadow-lg">
                         Refined minimalism for the modern wardrobe.
                     </h2>
@@ -68,66 +76,59 @@ const Login = () => {
             </div>
 
             {/* Form Side */}
-            <div className="w-full md:w-1/2 lg:w-2/5 min-h-screen bg-gradient-to-b md:bg-none from-[#F5F0EE] via-[#FAF8F7] to-white md:bg-white flex flex-col px-5 md:px-12 lg:px-20 z-0 pb-10">
+            <div className="w-full md:w-1/2 lg:w-2/5 min-h-screen bg-gradient-to-b md:bg-none from-[#F5F0EE] via-[#FAF8F7] to-white md:bg-white flex flex-col px-5 md:px-12 lg:px-20 pb-10">
                 <button
                     onClick={() => navigate(-1)}
-                    className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center mt-6 md:mt-12 mb-8 md:mb-12 active:scale-95 transition-transform hover:bg-[#F5F0EE] rounded-full focus:outline-none focus:ring-2 focus:ring-[#343434]"
+                    className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center mt-6 md:mt-12 mb-8 md:mb-12 hover:bg-[#F5F0EE] rounded-full transition-colors"
                     aria-label="Go back"
                 >
                     <Icon name="back" size="w-6 h-6" />
                 </button>
 
-                <h1 className="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-[#343434] mb-8 md:mb-12">
-                    {COPY.auth.login.title}
+                <h1 className="font-['Playfair_Display'] text-3xl md:text-4xl font-bold text-[#343434] mb-2">
+                    Welcome Back
                 </h1>
+                <p className="text-sm font-['DM_Sans'] text-[#999999] mb-8 md:mb-10">
+                    Sign in to your Muxury account
+                </p>
 
-                <form onSubmit={handleLogin} className="flex-1 flex flex-col" noValidate>
-                    {/* Email field */}
-                    <FormField
-                        label={COPY.auth.login.emailLabel}
-                        error={errors.email}
-                        required
-                    >
-                        <Input
-                            type="email"
-                            value={email}
-                            onChange={(e) => {
-                                setEmail(e.target.value);
-                                if (errors.email) setErrors({ ...errors, email: undefined });
-                            }}
-                            placeholder={COPY.auth.login.emailPlaceholder}
-                            error={!!errors.email}
-                            aria-label="Email address"
-                            aria-required="true"
-                            aria-invalid={!!errors.email}
-                        />
+                <form onSubmit={handleSubmit} noValidate className="flex-1 flex flex-col gap-1">
+                    {/* Phone */}
+                    <FormField label="Phone Number" error={errors.phone} required>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-['DM_Sans'] text-[#343434] bg-[#F5F0EE] px-3 py-[13px] rounded-lg border border-[#E5E5E5] select-none whitespace-nowrap">
+                                +91
+                            </span>
+                            <Input
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "").slice(0, 10)); setErrors(p => ({ ...p, phone: undefined })); }}
+                                placeholder="9876543210"
+                                error={!!errors.phone}
+                                aria-label="Phone number"
+                                aria-required="true"
+                                maxLength={10}
+                                className="flex-1"
+                            />
+                        </div>
                     </FormField>
 
-                    {/* Password field */}
-                    <FormField
-                        label={COPY.auth.login.passwordLabel}
-                        error={errors.password}
-                        helpText={COPY.auth.login.passwordHelp}
-                        required
-                    >
+                    {/* Password */}
+                    <FormField label="Password" error={errors.password} required>
                         <div className="relative">
                             <Input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
-                                onChange={(e) => {
-                                    setPassword(e.target.value);
-                                    if (errors.password) setErrors({ ...errors, password: undefined });
-                                }}
-                                placeholder={COPY.auth.login.passwordPlaceholder}
+                                onChange={(e) => { setPassword(e.target.value); setErrors(p => ({ ...p, password: undefined })); }}
+                                placeholder="Your password"
                                 error={!!errors.password}
                                 aria-label="Password"
                                 aria-required="true"
-                                aria-invalid={!!errors.password}
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#343434] transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#343434] rounded"
+                                onClick={() => setShowPassword(s => !s)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#343434] transition-colors p-2"
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 <Icon name="show" size="w-5 h-5" />
@@ -135,35 +136,30 @@ const Login = () => {
                         </div>
                     </FormField>
 
-                    <div className="flex items-center justify-between mb-8 md:mb-12">
-                        <label className="flex items-center gap-2 text-sm md:text-base font-['DM_Sans'] text-[#343434] cursor-pointer hover:text-[#CA8385] transition-colors min-h-[44px] -my-2 py-2">
-                            <input
-                                type="checkbox"
-                                className="w-4 h-4 md:w-5 md:h-5 accent-[#343434] rounded cursor-pointer"
-                                aria-label="Remember me"
-                            />
-                            {COPY.auth.login.rememberMe}
-                        </label>
+                    <div className="flex justify-end mb-4">
                         <Link
                             to="/forgot-password"
-                            className="text-sm md:text-base font-['DM_Sans'] text-[#343434] underline font-medium hover:text-[#CA8385] transition-colors min-h-[44px] flex items-center -my-2 py-2"
+                            className="text-sm font-['DM_Sans'] text-[#343434] underline hover:text-[#CA8385] transition-colors"
                         >
-                            {COPY.auth.login.forgotPassword}
+                            Forgot password?
                         </Link>
                     </div>
 
                     <LoadingButton
                         type="submit"
                         loading={loading}
-                        loadingText={COPY.auth.login.loading}
-                        className="w-full mt-auto md:mt-4 min-h-[44px]"
+                        loadingText="Sending OTP..."
+                        className="w-full mt-auto min-h-[50px]"
                         disabled={loading}
                     >
-                        {COPY.auth.login.submit}
+                        Continue
                     </LoadingButton>
 
-                    <p className="text-center text-sm md:text-base font-['DM_Sans'] text-[#999999] mt-6 md:mt-8">
-                        {COPY.auth.login.noAccount} <Link to="/register" className="text-[#343434] font-bold hover:text-[#CA8385] transition-colors min-h-[44px] inline-flex items-center -my-2 py-2">{COPY.auth.login.signUpLink}</Link>
+                    <p className="text-center text-sm font-['DM_Sans'] text-[#999999] mt-6">
+                        Don't have an account?{" "}
+                        <Link to="/register" className="text-[#343434] font-bold hover:text-[#CA8385] transition-colors">
+                            Create one
+                        </Link>
                     </p>
                 </form>
             </div>
