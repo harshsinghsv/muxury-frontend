@@ -19,7 +19,7 @@ export default function Header() {
 
   // Shared Desktop Header
   const desktopHeader = isAuth ? null : (
-    <header className="hidden md:flex items-center justify-between px-12 lg:px-24 xl:px-32 py-6 bg-white shrink-0 border-b border-[#EBEBEB] sticky top-0 z-50">
+    <header className="hidden rounded-lg md:flex items-center justify-between px-12 lg:px-24 xl:px-32 py-6 bg-white shrink-0 border-b border-[#EBEBEB] sticky top-0 z-50">
       <Link to="/" className="font-['Playfair_Display'] text-2xl font-bold text-[#343434]">
         Muxury.
       </Link>

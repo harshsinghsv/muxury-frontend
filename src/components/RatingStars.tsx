@@ -1,4 +1,4 @@
-import { Star, StarHalf } from "lucide-react";
+import { Star, StarRing } from "@solar-icons/react";
 
 interface RatingStarsProps {
     rating: number;
@@ -20,14 +20,14 @@ const RatingStars = ({ rating, showCount, size = 16 }: RatingStarsProps) => {
                         key={`full-${i}`}
                         size={size}
                         className="fill-gold text-gold"
-                    />
+                     weight="Outline"/>
                 ))}
                 {/* Half star */}
                 {hasHalfStar && (
-                    <StarHalf
+                    <StarRing
                         size={size}
                         className="fill-gold text-gold"
-                    />
+                     weight="Outline"/>
                 )}
                 {/* Empty stars */}
                 {Array.from({ length: emptyStars }).map((_, i) => (
@@ -35,7 +35,7 @@ const RatingStars = ({ rating, showCount, size = 16 }: RatingStarsProps) => {
                         key={`empty-${i}`}
                         size={size}
                         className="text-muted-foreground/30"
-                    />
+                     weight="Outline"/>
                 ))}
             </div>
             {showCount !== undefined && (

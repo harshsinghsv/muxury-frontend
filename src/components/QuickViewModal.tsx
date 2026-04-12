@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { X, Heart, ShoppingBag, Minus, Plus } from "lucide-react";
+import { CloseCircle, Heart, Bag, MinusCircle, AddCircle } from "@solar-icons/react";
 import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -57,7 +57,7 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                     className="absolute top-4 right-4 z-10 p-2 bg-background/80 backdrop-blur rounded-full hover:bg-muted transition-colors"
                     aria-label="Close"
                 >
-                    <X size={20} />
+                    <CloseCircle size={20}  weight="Outline"/>
                 </button>
 
                 <div className="grid md:grid-cols-2 gap-0">
@@ -137,7 +137,7 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                                     disabled={quantity <= 1}
                                     className="p-2 border border-border rounded-md hover:bg-muted transition-colors disabled:opacity-50"
                                 >
-                                    <Minus size={16} />
+                                    <MinusCircle size={16}  weight="Outline"/>
                                 </button>
                                 <span className="w-12 text-center font-medium">{quantity}</span>
                                 <button
@@ -145,7 +145,7 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                                     disabled={quantity >= product.stock}
                                     className="p-2 border border-border rounded-md hover:bg-muted transition-colors disabled:opacity-50"
                                 >
-                                    <Plus size={16} />
+                                    <AddCircle size={16}  weight="Outline"/>
                                 </button>
                             </div>
                         </div>
@@ -162,8 +162,8 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                                 disabled={product.stock === 0}
                                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-charcoal text-cream rounded-md font-medium hover:bg-charcoal-light transition-colors disabled:opacity-50"
                             >
-                                <ShoppingBag size={18} />
-                                Add to Cart
+                                <Bag size={18}  weight="Outline"/>
+                                AddCircle to Cart
                             </button>
                             <button
                                 onClick={handleWishlistToggle}
@@ -171,9 +171,9 @@ const QuickViewModal = ({ product, isOpen, onClose }: QuickViewModalProps) => {
                                     ? "border-gold bg-gold/10 text-gold"
                                     : "border-border hover:border-gold"
                                     }`}
-                                aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                                aria-label={inWishlist ? "Remove from wishlist" : "AddCircle to wishlist"}
                             >
-                                <Heart size={20} className={inWishlist ? "fill-gold" : ""} />
+                                <Heart size={20} className={inWishlist ? "fill-gold" : ""}  weight="Outline"/>
                             </button>
                         </div>
 
