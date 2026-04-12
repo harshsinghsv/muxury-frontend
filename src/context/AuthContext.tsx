@@ -1,9 +1,10 @@
 /**
- * AuthContext — wired to real backend API.
+ * AuthContext — MOCK MODE (client demo)
  *
- * Zero UI changes: same context shape as before.
- * Implementation change only: login/register/logout now call real endpoints.
- * Tokens stored via tokenStorage (localStorage), 15-min access + 7-day refresh.
+ * Auto-logs in with MOCK_USER so the site works without a backend.
+ * To restore real API:
+ *   1. Remove the MOCK_MODE block below.
+ *   2. Uncomment the real restoreSession / login / register / logout calls.
  */
 
 import React, {
@@ -14,6 +15,7 @@ import React, {
     useCallback,
 } from 'react';
 import api, { tokenStorage } from '../lib/api';
+import { MOCK_USER } from '@/data/mock';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -78,41 +80,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading: true,
     });
 
-    // On mount: restore session from stored access token
+    // ─── MOCK_MODE: auto-login with demo user ────────────────────────────────
     useEffect(() => {
-        const restoreSession = async () => {
-            const token = tokenStorage.getAccess();
-            if (!token) {
-                dispatch({ type: 'SET_LOADING', payload: false });
-                return;
-            }
-            try {
-                const { data } = await api.get('/auth/me');
-                dispatch({ type: 'SET_USER', payload: data.data.user });
-            } catch {
-                // Token invalid or expired — the interceptor handles refresh.
-                // If it fails again, clear and treat as logged out.
-                tokenStorage.clear();
-                dispatch({ type: 'LOGOUT' });
-            }
-        };
-        restoreSession();
+        dispatch({ type: 'SET_USER', payload: MOCK_USER });
     }, []);
+    // ─── REAL API (restore when backend is connected) ─────────────────────────
+    // useEffect(() => {
+    //     const restoreSession = async () => {
+    //         const token = tokenStorage.getAccess();
+    //         if (!token) { dispatch({ type: 'SET_LOADING', payload: false }); return; }
+    //         try {
+    //             const { data } = await api.get('/auth/me');
+    //             dispatch({ type: 'SET_USER', payload: data.data.user });
+    //         } catch {
+    //             tokenStorage.clear();
+    //             dispatch({ type: 'LOGOUT' });
+    //         }
+    //     };
+    //     restoreSession();
+    // }, []);
 
     // ─── Login ────────────────────────────────────────────────────────────────
 
-    const login = useCallback(async (email: string, password: string) => {
-        dispatch({ type: 'SET_LOADING', payload: true });
-        try {
-            const { data } = await api.post('/auth/login', { email, password });
-            const { user, accessToken, refreshToken } = data.data;
-            tokenStorage.setTokens(accessToken, refreshToken);
-            dispatch({ type: 'SET_USER', payload: user });
-        } catch (err: any) {
-            dispatch({ type: 'SET_LOADING', payload: false });
-            const message = err?.response?.data?.message || 'Login failed. Please try again.';
-            throw new Error(message);
-        }
+    const login = useCallback(async (_email: string, _password: string) => {
+        // MOCK_MODE: accept any credentials
+        dispatch({ type: 'SET_USER', payload: MOCK_USER });
+        // REAL API:
+        // dispatch({ type: 'SET_LOADING', payload: true });
+        // try {
+        //     const { data } = await api.post('/auth/login', { email: _email, password: _password });
+        //     const { user, accessToken, refreshToken } = data.data;
+        //     tokenStorage.setTokens(accessToken, refreshToken);
+        //     dispatch({ type: 'SET_USER', payload: user });
+        // } catch (err: any) {
+        //     dispatch({ type: 'SET_LOADING', payload: false });
+        //     throw new Error(err?.response?.data?.message || 'Login failed.');
+        // }
     }, []);
 
     // ─── Register ─────────────────────────────────────────────────────────────
@@ -125,29 +128,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             password: string;
             phone?: string;
         }) => {
-            dispatch({ type: 'SET_LOADING', payload: true });
-            try {
-                const { data: res } = await api.post('/auth/register', data);
-                dispatch({ type: 'SET_LOADING', payload: false });
-                
-                // If auto-logged in (e.g. development mode bypasses email verification)
-                if (res.data?.accessToken && res.data?.refreshToken && res.data?.user) {
-                    tokenStorage.setTokens(res.data.accessToken, res.data.refreshToken);
-                    dispatch({ type: 'SET_USER', payload: res.data.user });
-                }
-                
-                return { message: res.message };
-            } catch (err: any) {
-                dispatch({ type: 'SET_LOADING', payload: false });
-                let message = err?.response?.data?.message || 'Registration failed. Please try again.';
-                
-                // Format detailed validation errors if they exist
-                if (err?.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-                    message = err.response.data.errors.map((e: any) => e.message).join(' | ');
-                }
-                
-                throw new Error(message);
-            }
+            // MOCK_MODE: auto-register and log in
+            const mockNewUser = { ...MOCK_USER, firstName: data.firstName, lastName: data.lastName, email: data.email };
+            dispatch({ type: 'SET_USER', payload: mockNewUser });
+            return { message: 'Account created successfully.' };
+            // REAL API:
+            // dispatch({ type: 'SET_LOADING', payload: true });
+            // try {
+            //     const { data: res } = await api.post('/auth/register', data);
+            //     dispatch({ type: 'SET_LOADING', payload: false });
+            //     if (res.data?.accessToken && res.data?.user) {
+            //         tokenStorage.setTokens(res.data.accessToken, res.data.refreshToken);
+            //         dispatch({ type: 'SET_USER', payload: res.data.user });
+            //     }
+            //     return { message: res.message };
+            // } catch (err: any) {
+            //     dispatch({ type: 'SET_LOADING', payload: false });
+            //     throw new Error(err?.response?.data?.message || 'Registration failed.');
+            // }
         },
         []
     );
@@ -155,18 +153,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // ─── Logout ───────────────────────────────────────────────────────────────
 
     const logout = useCallback(async () => {
-        const refreshToken = tokenStorage.getRefresh();
-        try {
-            // Best-effort: revoke refresh token on server
-            if (refreshToken) {
-                await api.post('/auth/logout', { refreshToken });
-            }
-        } catch {
-            // Ignore errors; clear tokens regardless
-        } finally {
-            tokenStorage.clear();
-            dispatch({ type: 'LOGOUT' });
-        }
+        // MOCK_MODE: just dispatch logout
+        dispatch({ type: 'LOGOUT' });
+        // REAL API:
+        // const refreshToken = tokenStorage.getRefresh();
+        // try { if (refreshToken) await api.post('/auth/logout', { refreshToken }); } catch {}
+        // finally { tokenStorage.clear(); dispatch({ type: 'LOGOUT' }); }
     }, []);
 
     return (
