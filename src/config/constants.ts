@@ -39,7 +39,7 @@ export const COPY = {
         allProducts: "All Products",
         searchPlaceholder: "Search...",
         desktopSearchPlaceholder: "Search collection...",
-        categories: ["All", "Outerwear", "Accessories", "Men's Fashion", "Women's Fashion", "Dresses", "Suits"],
+        categories: ["All", "Outerwear", "Accessories", "Men's Fashion", "Women's Fashion", "Dresses", "Suits", "Bags"],
         emptyState: {
             title: "No items found",
             description: "Try adjusting your filters.",
