@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useProduct } from "@/hooks/useProducts";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Refresh } from "@solar-icons/react";
 import { COPY } from "@/config/constants";
 
 const ProductDetails = () => {
@@ -25,7 +25,7 @@ const ProductDetails = () => {
     if (isLoading) {
         return (
             <div className="min-h-screen bg-[#FAFAFA] flex justify-center items-center">
-                <Loader2 className="w-8 h-8 text-[#CA8385] animate-spin" />
+                <Refresh className="w-8 h-8 text-[#CA8385] animate-spin"  weight="Outline"/>
             </div>
         );
     }
@@ -169,7 +169,7 @@ const ProductDetails = () => {
                         </p>
                     </div>
 
-                    {/* Desktop Add to Cart */}
+                    {/* Desktop AddCircle to Cart */}
                     <div className="hidden md:block mt-auto pb-12">
                         <button
                             onClick={handleAddToCart}

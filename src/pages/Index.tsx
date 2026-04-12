@@ -13,6 +13,40 @@ import productSunglasses from "@/assets/product-sunglasses.jpg";
 import productDress2 from "@/assets/product-dress-2.jpg";
 import productSuit2 from "@/assets/product-suit-2.jpg";
 
+const CategorySection = ({ title, categoryName }: { title: string, categoryName: string }) => {
+  const { data, isLoading, error } = useProducts({ category: categoryName });
+  const products = (data || []).slice(0, 4);
+
+  if (!isLoading && products.length === 0) return null;
+
+  return (
+    <div className="mb-10 md:mb-16 mt-16 md:mt-20">
+      <div className="flex items-center justify-between mb-4 md:mb-8">
+        <h2 className="font-['DM_Sans'] text-xs md:text-sm font-bold tracking-widest uppercase text-[#343434]">{title}</h2>
+        <Link to={`/shop?category=${encodeURIComponent(categoryName.toLowerCase())}`} className="min-h-[44px] min-w-[44px] flex items-center justify-end font-['DM_Sans'] text-sm md:text-base text-[#CA8385] hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-[#CA8385] rounded">
+          {COPY.home.sections.seeAll || "See All"}
+        </Link>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+                <ProductSkeleton key={i} />
+            ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-10 text-red-500">Failed to load items.</div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+          {products.map(product => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Index = () => {
   const { user } = useAuth();
   const { data: productsData, isLoading, error } = useProducts({ isFeatured: true });
@@ -117,6 +151,11 @@ const Index = () => {
           ))}
         </div>
       )}
+
+      {/* Sections for Each Category */}
+      {["Outerwear", "Accessories", "Men's Fashion", "Women's Fashion", "Dresses", "Suits", "Bags"].map((cat) => (
+         <CategorySection key={cat} title={cat} categoryName={cat} />
+      ))}
     </div>
   );
 };

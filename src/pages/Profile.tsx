@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { User, Package, Heart, ChevronRight, Settings, MapPin, CreditCard, LogOut, Lock, Bell } from "lucide-react";
+import { User, Box, Heart, AltArrowRight, Settings, MapPoint, Card, Logout, Lock, Bell } from "@solar-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { getProductById } from "@/data/products";
@@ -9,7 +9,7 @@ import { COPY } from "@/config/constants";
 import OrderSkeleton from "@/components/OrderSkeleton";
 
 import { useOrders, OrderSummary } from "@/hooks/useOrders";
-import { Loader2 } from "lucide-react";
+import { Refresh } from "@solar-icons/react";
 
 type ViewState = "menu" | "orders" | "wishlist";
 
@@ -41,14 +41,14 @@ const Profile = () => {
             items: [
                 { id: 'profile', icon: User, label: COPY.profile.menu.profile, action: () => {} },
                 { id: 'change-password', icon: Lock, label: COPY.profile.menu.changePassword, action: () => navigate("/change-password") },
-                { id: 'address', icon: MapPin, label: COPY.profile.menu.address, action: () => {} },
-                { id: 'payment', icon: CreditCard, label: COPY.profile.menu.payment, action: () => {} },
+                { id: 'address', icon: MapPoint, label: COPY.profile.menu.address, action: () => {} },
+                { id: 'payment', icon: Card, label: COPY.profile.menu.payment, action: () => {} },
             ]
         },
         {
             title: COPY.profile.sections.general,
             items: [
-                { id: 'orders', icon: Package, label: COPY.profile.orders.title, action: () => setView("orders") },
+                { id: 'orders', icon: Box, label: COPY.profile.orders.title, action: () => setView("orders") },
                 { id: 'wishlist', icon: Heart, label: COPY.profile.wishlist.title, action: () => setView("wishlist") },
                 { id: 'notification', icon: Bell, label: COPY.profile.menu.notification, action: () => {} },
                 { id: 'settings', icon: Settings, label: COPY.profile.menu.settings, action: () => {} },
@@ -88,7 +88,7 @@ const Profile = () => {
                                 </div>
                             )) : (
                                 <div className="text-center py-20 bg-white border border-[#EBEBEB] rounded-2xl">
-                                    <Package size={48} className="mx-auto text-[#EBEBEB] mb-4" />
+                                    <Box size={48} className="mx-auto text-[#EBEBEB] mb-4"  weight="Outline"/>
                                     <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">{COPY.profile.orders.emptyState.title}</h3>
                                     <p className="font-['DM_Sans'] text-[#999999] text-sm">{COPY.profile.orders.emptyState.description}</p>
                                 </div>
@@ -109,7 +109,7 @@ const Profile = () => {
                         </div>
                     ) : (
                         <div className="text-center py-20 bg-white border border-[#EBEBEB] rounded-2xl">
-                            <Heart size={48} className="mx-auto text-[#EBEBEB] mb-4" />
+                            <Heart size={48} className="mx-auto text-[#EBEBEB] mb-4"  weight="Outline"/>
                             <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">{COPY.profile.wishlist.emptyState.title}</h2>
                             <p className="font-['DM_Sans'] text-sm text-[#999999]">{COPY.profile.wishlist.emptyState.description}</p>
                         </div>
@@ -149,7 +149,7 @@ const Profile = () => {
                 <div className="hidden md:flex items-center justify-between mb-12">
                     <h1 className="font-['Playfair_Display'] text-4xl font-bold text-[#343434]">{COPY.profile.title}</h1>
                     <button onClick={handleLogout} className="flex items-center gap-2 px-6 py-3 rounded-full border border-[#EBEBEB] text-[#CA8385] font-['DM_Sans'] font-medium hover:bg-white transition-colors">
-                        <LogOut size={18} />
+                        <Logout size={18}  weight="Outline"/>
                         {COPY.profile.signOut}
                     </button>
                 </div>
