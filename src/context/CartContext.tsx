@@ -30,6 +30,8 @@ interface CartContextType {
     clearCart: () => void;
     cartCount: number;
     subtotal: number;
+    mrpTotal: number;
+    itemDiscount: number;
     tax: number;
     shipping: number;
     total: number;
@@ -180,8 +182,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const cartCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
     const subtotal = state.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    const mrpTotal = state.items.reduce((sum, item) => sum + (item.product.originalPrice || item.product.price * 1.35) * item.quantity, 0);
+    const itemDiscount = mrpTotal - subtotal;
     const tax = subtotal * TAX_RATE;
-    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_COST;
     const total = subtotal + tax + shipping;
 
     return (
@@ -194,6 +198,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 clearCart,
                 cartCount,
                 subtotal,
+                mrpTotal,
+                itemDiscount,
                 tax,
                 shipping,
                 total,
