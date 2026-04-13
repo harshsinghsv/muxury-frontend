@@ -16,6 +16,9 @@ import AdminRoute from "@/components/admin/AdminRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
+import Footer from "@/components/Footer";
+import BackToTop from "@/components/BackToTop";
+import WhatsAppWidget from "@/components/WhatsAppWidget";
 
 // Pages
 import Index from "./pages/Index";
@@ -31,6 +34,8 @@ import CreateNewPassword from "./pages/CreateNewPassword";
 import ChangePassword from "./pages/ChangePassword";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import StaticPage from "./pages/StaticPage";
+import Contact from "./pages/Contact";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -106,14 +111,25 @@ const AppContent = () => {
           <Route path="/collections" element={<Shop />} />
           <Route path="/wishlist" element={<Profile />} />
           <Route path="/orders" element={<Profile />} />
-          <Route path="/contact" element={<Index />} />
+          
+          {/* Static Pages */}
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<StaticPage type="about" />} />
+          <Route path="/privacy" element={<StaticPage type="privacy" />} />
+          <Route path="/terms" element={<StaticPage type="terms" />} />
+          <Route path="/shipping" element={<StaticPage type="shipping" />} />
+          <Route path="/returns" element={<StaticPage type="returns" />} />
+          <Route path="/faq" element={<StaticPage type="faq" />} />
 
           {/* 404 catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        {!isAdminRoute && <Footer />}
       </main>
 
       {!isAdminRoute && <BottomNav />}
+      {!isAdminRoute && <BackToTop />}
+      {!isAdminRoute && <WhatsAppWidget />}
     </div>
   );
 };

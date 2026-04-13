@@ -4,6 +4,7 @@ import { useCart } from "@/context/CartContext";
 import Icon from "@/components/Icon";
 import { useAuth } from "@/context/AuthContext";
 import { CgProfile } from "react-icons/cg";
+import SearchBox from "@/components/SearchBox";
 
 export default function Header() {
   const location = useLocation();
@@ -27,6 +28,9 @@ export default function Header() {
         <Link to="/" className="hover:text-[#CA8385] transition-colors">Home</Link>
         <Link to="/shop" className="hover:text-[#CA8385] transition-colors">Collection</Link>
       </nav>
+      <div className="flex-1 max-w-lg px-8 flex justify-center">
+        <SearchBox />
+      </div>
       <div className="flex items-center gap-5 relative">
         <button onClick={() => navigate('/shop')} className="w-10 h-10 rounded-full border border-[#EBEBEB] flex items-center justify-center hover:bg-[#FAF8F7] transition-colors">
           <Icon name="buy" size="w-5 h-5" />
@@ -62,35 +66,38 @@ export default function Header() {
 
     // Home Header Pattern
     if (location.pathname === '/') {
-      return (
-        <header className="flex md:hidden items-center justify-between px-5 py-4 bg-transparent shrink-0">
-          <button onClick={() => setIsSidebarOpen(true)} className="min-w-[44px] min-h-[44px] w-11 h-11 flex flex-col justify-center items-center gap-[5px] active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] focus:outline-none">
-            <span className="w-5 h-[2px] bg-[#343434] rounded-full" />
-            <span className="w-5 h-[2px] bg-[#343434] rounded-full" />
-            <span className="w-3 h-[2px] bg-[#343434] rounded-full" />
-          </button>
-          <div className="flex items-center gap-2 relative">
-            <button onClick={() => navigate('/shop')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center relative active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
-              <Icon name="buy" size="w-5 h-5" />
+        <header className="flex flex-col md:hidden w-full bg-white z-40 relative">
+          <div className="flex items-center justify-between px-5 py-4 shrink-0">
+            <button onClick={() => setIsSidebarOpen(true)} className="min-w-[44px] min-h-[44px] w-11 h-11 flex flex-col justify-center items-center gap-[5px] active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] focus:outline-none">
+              <span className="w-5 h-[2px] bg-[#343434] rounded-full" />
+              <span className="w-5 h-[2px] bg-[#343434] rounded-full" />
+              <span className="w-3 h-[2px] bg-[#343434] rounded-full" />
             </button>
-            <button onClick={() => navigate('/cart')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center relative active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
-              <Icon name="bag" size="w-5 h-5" />
-              {cartItemsCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#CA8385] rounded-full text-white text-[9px] flex items-center justify-center font-bold">
-                  {cartItemsCount}
-                </span>
-              )}
-            </button>
-            <button onClick={() => navigate('/profile')} className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full overflow-hidden active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] flex items-center justify-center bg-[#FAF8F7] text-[#343434] font-medium">
-              {isAuthenticated && user?.firstName ? (
-                <span>{user.firstName.charAt(0).toUpperCase()}</span>
-              ) : (
-                <CgProfile size={24} />
-              )}
-            </button>
+            <div className="flex items-center gap-2 relative">
+              <button onClick={() => navigate('/shop')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center relative active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+                <Icon name="buy" size="w-5 h-5" />
+              </button>
+              <button onClick={() => navigate('/cart')} className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center relative active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent]">
+                <Icon name="bag" size="w-5 h-5" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#CA8385] rounded-full text-white text-[9px] flex items-center justify-center font-bold">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </button>
+              <button onClick={() => navigate('/profile')} className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full overflow-hidden active:scale-95 transition-transform [-webkit-tap-highlight-color:transparent] flex items-center justify-center bg-[#FAF8F7] text-[#343434] font-medium">
+                {isAuthenticated && user?.firstName ? (
+                  <span>{user.firstName.charAt(0).toUpperCase()}</span>
+                ) : (
+                  <CgProfile size={24} />
+                )}
+              </button>
+            </div>
+          </div>
+          <div className="px-5 pb-4">
+             <SearchBox />
           </div>
         </header>
-      );
     }
 
     // Transactional / Center Title Pattern 

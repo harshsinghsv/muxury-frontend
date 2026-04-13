@@ -10,6 +10,10 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { isInWishlist, toggleWishlist } = useWishlist();
 
+  // Indian E-Commerce standard: MRP and Discount
+  const mrp = product.price * 1.5; // Mock 50% markup for MRP display
+  const discountPercent = Math.round(((mrp - product.price) / mrp) * 100);
+
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,13 +49,21 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </div>
 
       {/* Product Details */}
-      <div className="px-1">
-        <h3 className="font-['DM_Sans'] text-sm font-medium text-[#343434] truncate mb-0.5">
+      <div className="px-1 mt-3">
+        <h3 className="font-['DM_Sans'] text-sm font-medium text-[#343434] truncate mb-1">
           {product.name}
         </h3>
-        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434]">
-          ₹{product.price.toFixed(2)}
-        </p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="font-['DM_Sans'] text-sm font-bold text-[#343434]">
+            ₹{product.price.toLocaleString('en-IN')}
+          </p>
+          <p className="font-['DM_Sans'] text-[10px] text-[#999999] line-through">
+            MRP ₹{mrp.toLocaleString('en-IN')}
+          </p>
+          <span className="font-['DM_Sans'] text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
+            {discountPercent}% OFF
+          </span>
+        </div>
       </div>
     </Link>
   );

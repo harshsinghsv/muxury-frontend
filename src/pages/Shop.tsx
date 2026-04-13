@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
@@ -6,50 +6,103 @@ import { useProducts } from "@/hooks/useProducts";
 import { Product } from "@/data/products";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { COPY } from "@/config/constants";
+import Icon from "@/components/Icon";
+
+const PAGE_SIZE = 8;
 
 const Shop = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-    // Active category
+    // Active Params
     const categoryQuery = searchParams.get("category");
     const activeCategory = categoryQuery
         ? COPY.shop.categories.find(c => c.toLowerCase() === categoryQuery.toLowerCase()) || "All"
         : "All";
 
+    const searchQuery = searchParams.get("search") || "";
+    const sortQuery = searchParams.get("sort") || "Recommended";
+    const ratingQuery = searchParams.get("minRating");
+    const minRating = ratingQuery ? parseFloat(ratingQuery) : 0;
+
     const { data: productsData, isLoading, error } = useProducts({
         category: categoryQuery !== "All" && categoryQuery ? categoryQuery : undefined
     });
 
-    const filteredProducts = productsData || [];
+    const baseProducts = productsData || [];
 
-    const handleCategoryClick = (cat: string) => {
+    // Local Filtering & Sorting
+    const filteredAndSortedProducts = useMemo(() => {
+        let result = [...baseProducts];
+
+        // 1. Search Query
+        if (searchQuery) {
+            const sq = searchQuery.toLowerCase();
+            result = result.filter(p => 
+                p.name.toLowerCase().includes(sq) || 
+                p.description.toLowerCase().includes(sq) ||
+                p.category.toLowerCase().includes(sq)
+            );
+        }
+
+        // 2. Rating Filter
+        if (minRating > 0) {
+            result = result.filter(p => p.rating >= minRating);
+        }
+
+        // 3. Sorting
+        if (sortQuery === 'Lowest Price') {
+            result.sort((a, b) => a.price - b.price);
+        } else if (sortQuery === 'Highest Price') {
+            result.sort((a, b) => b.price - a.price);
+        } else if (sortQuery === 'Newest') {
+            result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+        }
+
+        return result;
+    }, [baseProducts, searchQuery, minRating, sortQuery]);
+
+    const visibleProducts = filteredAndSortedProducts.slice(0, visibleCount);
+    const hasMore = visibleCount < filteredAndSortedProducts.length;
+
+    // Reset pagination when filters change
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+    }, [categoryQuery, searchQuery, sortQuery, ratingQuery]);
+
+    const handleParamChange = (key: string, value: string | null) => {
         const newParams = new URLSearchParams(searchParams);
-        if (cat === "All") {
-            newParams.delete("category");
+        if (value === null || value === "All") {
+            newParams.delete(key);
         } else {
-            newParams.set("category", cat.toLowerCase());
+            newParams.set(key, value);
         }
         setSearchParams(newParams);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    return (
-        <div className="pb-24 md:flex md:gap-8 md:px-12 lg:px-24 xl:px-32 md:pt-12">
+    const removeFilterChip = (type: 'category' | 'search' | 'rating') => {
+        if (type === 'category') handleParamChange('category', null);
+        if (type === 'search') handleParamChange('search', null);
+        if (type === 'rating') handleParamChange('minRating', null);
+    };
 
-            {/* Desktop Sidebar Filter (Hidden on Mobile) */}
-            <aside className="hidden md:block w-64 flex-shrink-0">
+    return (
+        <div className="pb-24 md:flex md:gap-8 md:px-12 lg:px-24 xl:px-32 md:pt-12 min-h-screen">
+
+            {/* Desktop Sidebar Filter */}
+            <aside className="hidden md:block w-64 flex-shrink-0 animate-fade-in">
                 <div className="sticky top-[100px]">
-                    <div className="mb-6">
-                        <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-4">{COPY.shop.categories[0] === "All" ? "Categories" : COPY.shop.title}</h3>
-                        <div className="flex flex-col gap-3">
+                    <div className="mb-8">
+                        <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-4">Categories</h3>
+                        <div className="flex flex-col gap-2">
                             {COPY.shop.categories.map((cat) => (
                                 <button
                                     key={cat}
-                                    onClick={() => handleCategoryClick(cat)}
-                                    className={`text-left font-['DM_Sans'] text-sm hover:text-[#CA8385] transition-colors min-h-[44px] flex items-center ${activeCategory === cat ? "text-[#CA8385] font-bold" : "text-[#343434]"}`}
-                                    aria-current={activeCategory === cat ? 'page' : undefined}
+                                    onClick={() => handleParamChange('category', cat)}
+                                    className={`text-left font-['DM_Sans'] text-sm hover:text-[#CA8385] transition-colors min-h-[40px] flex items-center ${activeCategory === cat ? "text-[#CA8385] font-bold" : "text-[#343434]"}`}
                                 >
                                     {cat}
                                 </button>
@@ -57,15 +110,31 @@ const Shop = () => {
                         </div>
                     </div>
 
-                    <div className="mb-6">
+                    <div className="mb-8">
                         <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-4">{COPY.shop.filters.sortBy}</h3>
                         <div className="flex flex-col gap-3">
                             {COPY.shop.sortOptions.map(opt => (
-                                <label key={opt} className="flex items-center gap-3 cursor-pointer group min-h-[44px]">
-                                    <div className="w-4 h-4 rounded-full border border-[#EBEBEB] flex items-center justify-center group-hover:border-[#CA8385] transition-colors">
-                                        {opt === 'Recommended' && <div className="w-2 h-2 rounded-full bg-[#CA8385]" />}
+                                <label key={opt} onClick={() => handleParamChange('sort', opt === 'Recommended' ? null : opt)} className="flex items-center gap-3 cursor-pointer group min-h-[30px]">
+                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${sortQuery === opt ? 'border-[#CA8385]' : 'border-[#EBEBEB] group-hover:border-[#CA8385]'}`}>
+                                        {sortQuery === opt && <div className="w-2 h-2 rounded-full bg-[#CA8385]" />}
                                     </div>
-                                    <span className="font-['DM_Sans'] text-sm text-[#343434] group-hover:text-[#CA8385] transition-colors">{opt}</span>
+                                    <span className={`font-['DM_Sans'] text-sm transition-colors ${sortQuery === opt ? 'text-[#CA8385] font-bold' : 'text-[#343434] group-hover:text-[#CA8385]'}`}>{opt}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="mb-8">
+                        <h3 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-4">Rating</h3>
+                        <div className="flex flex-col gap-3">
+                            {[4, 3, 2].map(rating => (
+                                <label key={rating} onClick={() => handleParamChange('minRating', rating.toString())} className="flex items-center gap-3 cursor-pointer group min-h-[30px]">
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${minRating === rating ? 'border-[#CA8385] bg-[#CA8385]' : 'border-[#EBEBEB] group-hover:border-[#CA8385]'}`}>
+                                        {minRating === rating && <Icon name="close" size="w-3 h-3" color="white" />}
+                                    </div>
+                                    <span className={`font-['DM_Sans'] text-sm flex items-center transition-colors ${minRating === rating ? 'text-[#CA8385] font-bold' : 'text-[#343434]'}`}>
+                                        {rating} Stars & Up
+                                    </span>
                                 </label>
                             ))}
                         </div>
@@ -75,23 +144,22 @@ const Shop = () => {
 
             {/* Main Content Area */}
             <div className="flex-1 min-w-0">
-                {/* Mobile Header & Sticky Filter Bar */}
-                <div className="md:hidden bg-[#FAFAFA] pb-3 mb-2 px-5 sticky top-0 z-20 pt-1 -mt-2">
-                    {/* Search / Filter Row */}
-                    <div className="mb-4">
-                        <div className="relative">
+                {/* Mobile Filter & Categories Header */}
+                <div className="md:hidden bg-[#FAFAFA] pb-3 mb-2 px-5 sticky top-0 z-20 pt-1 -mt-2 shadow-sm">
+                    {/* Search Mock Bar row for Mobile */}
+                    <div className="mb-4 pt-2">
+                        <div className="flex gap-2">
                             <input
                                 type="text"
+                                readOnly
+                                value={searchQuery || ""}
                                 placeholder={COPY.shop.searchPlaceholder}
-                                className="w-full h-14 px-12 rounded-2xl border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] focus:ring-1 focus:ring-[#CA8385] transition-colors"
+                                onClick={() => setIsFilterOpen(true)}
+                                className="flex-1 h-12 px-5 rounded-2xl border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none"
                             />
-                            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
                             <button
                                 onClick={() => setIsFilterOpen(true)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-[#343434]"
+                                className="w-12 h-12 flex items-center justify-center bg-white border border-[#EBEBEB] rounded-2xl text-[#343434]"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="4" y1="21" x2="4" y2="14"></line>
@@ -108,13 +176,13 @@ const Shop = () => {
                         </div>
                     </div>
 
-                    {/* Category Pills */}
+                    {/* Category Pills Mobile */}
                     <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 snap-x">
                         {COPY.shop.categories.map((cat) => (
                             <button
                                 key={cat}
-                                onClick={() => handleCategoryClick(cat)}
-                                className={`snap-start px-5 py-2.5 min-h-[44px] rounded-full font-['DM_Sans'] text-sm font-medium whitespace-nowrap transition-all focus:outline-none focus:ring-2 focus:ring-[#CA8385] focus:ring-offset-2 ${activeCategory === cat
+                                onClick={() => handleParamChange('category', cat)}
+                                className={`snap-start px-5 py-2.5 min-h-[44px] rounded-full font-['DM_Sans'] text-sm font-medium whitespace-nowrap transition-all focus:outline-none ${activeCategory === cat
                                     ? "bg-[#CA8385] text-white"
                                     : "bg-white border border-[#EBEBEB] text-[#343434]"
                                     }`}
@@ -125,23 +193,37 @@ const Shop = () => {
                     </div>
                 </div>
 
-                {/* Desktop Search Bar */}
-                <div className="hidden md:block mb-8 relative max-w-md">
-                    <input
-                        type="text"
-                        placeholder={COPY.shop.desktopSearchPlaceholder}
-                        className="w-full h-12 px-12 rounded-full border border-[#EBEBEB] bg-white text-[#343434] placeholder-[#999999] text-sm font-['DM_Sans'] focus:outline-none focus:border-[#CA8385] focus:ring-1 focus:ring-[#CA8385] transition-colors"
-                    />
-                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </div>
-
                 {/* Results Grid */}
                 <main className="px-5 md:px-0">
-                    <div className="flex items-center justify-between font-['DM_Sans'] text-xs font-bold tracking-widest uppercase text-[#343434] mb-4 md:mb-6">
-                        <h2>{activeCategory === "All" ? COPY.shop.allProducts : activeCategory} ({filteredProducts.length})</h2>
+                    <div className="flex flex-col gap-4 mb-4 md:mb-6">
+                        <div className="flex items-center justify-between font-['DM_Sans'] text-sm md:text-base font-bold text-[#343434]">
+                            <h2>{activeCategory === "All" ? COPY.shop.allProducts : activeCategory} ({filteredAndSortedProducts.length})</h2>
+                        </div>
+                        
+                        {/* Active Filter Chips */}
+                        {(searchQuery || categoryQuery || minRating > 0) && (
+                            <div className="flex flex-wrap gap-2 animate-fade-in">
+                                {searchQuery && (
+                                    <div className="flex items-center gap-2 bg-[#FAF8F7] border border-[#CA8385]/30 px-3 py-1.5 rounded-full">
+                                        <span className="font-['DM_Sans'] text-xs text-[#343434]">Search: <span className="font-bold">"{searchQuery}"</span></span>
+                                        <button onClick={() => removeFilterChip('search')} className="text-[#CA8385] hover:text-[#EF5050]"><Icon name="close" size="w-3 h-3" /></button>
+                                    </div>
+                                )}
+                                {categoryQuery && categoryQuery !== "All" && (
+                                    <div className="flex items-center gap-2 bg-[#FAF8F7] border border-[#CA8385]/30 px-3 py-1.5 rounded-full">
+                                        <span className="font-['DM_Sans'] text-xs text-[#343434]">Category: <span className="font-bold">{activeCategory}</span></span>
+                                        <button onClick={() => removeFilterChip('category')} className="text-[#CA8385] hover:text-[#EF5050]"><Icon name="close" size="w-3 h-3" /></button>
+                                    </div>
+                                )}
+                                {minRating > 0 && (
+                                    <div className="flex items-center gap-2 bg-[#FAF8F7] border border-[#CA8385]/30 px-3 py-1.5 rounded-full">
+                                        <span className="font-['DM_Sans'] text-xs text-[#343434]">Rating: <span className="font-bold">{minRating}★ +</span></span>
+                                        <button onClick={() => removeFilterChip('rating')} className="text-[#CA8385] hover:text-[#EF5050]"><Icon name="close" size="w-3 h-3" /></button>
+                                    </div>
+                                )}
+                                <button onClick={() => setSearchParams(new URLSearchParams())} className="font-['DM_Sans'] text-xs text-[#999999] hover:underline ml-2">Clear all</button>
+                            </div>
+                        )}
                     </div>
 
                     {isLoading ? (
@@ -153,20 +235,34 @@ const Shop = () => {
                     ) : error ? (
                         <div className="text-center py-20 text-red-500">Failed to load products. Please try again.</div>
                     ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-                            {filteredProducts.map((product) => (
-                                <ProductCard key={product.id} product={product} />
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+                                {visibleProducts.map((product) => (
+                                    <ProductCard key={product.id} product={product} />
+                                ))}
+                            </div>
+                            
+                            {/* Pagination / Load More */}
+                            {hasMore && (
+                                <div className="mt-12 flex justify-center">
+                                    <button 
+                                        onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                                        className="px-8 py-4 bg-white border border-[#343434] text-[#343434] font-['DM_Sans'] font-bold rounded-full hover:bg-[#343434] hover:text-white transition-colors"
+                                    >
+                                        Load More
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
 
-                    {filteredProducts.length === 0 && (
-                        <div className="text-center py-20 bg-white md:bg-transparent rounded-3xl md:border md:border-[#EBEBEB] mt-8">
+                    {filteredAndSortedProducts.length === 0 && !isLoading && (
+                        <div className="text-center py-20 bg-white md:bg-transparent rounded-3xl md:border md:border-[#EBEBEB] mt-8 animate-fade-in">
                             <h2 className="font-['Playfair_Display'] text-xl font-bold text-[#343434] mb-2">{COPY.shop.emptyState.title}</h2>
                             <p className="font-['DM_Sans'] text-sm text-[#999999] mb-6">{COPY.shop.emptyState.description}</p>
                             <button
-                                onClick={() => handleCategoryClick("All")}
-                                className="bg-[#343434] text-white font-['DM_Sans'] text-sm font-medium px-6 py-3 min-h-[44px] rounded-full hover:bg-black transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+                                onClick={() => setSearchParams(new URLSearchParams())}
+                                className="bg-[#343434] text-white font-['DM_Sans'] text-sm font-medium px-6 py-3 min-h-[44px] rounded-full hover:bg-black transition-colors"
                             >
                                 {COPY.shop.emptyState.cta}
                             </button>
@@ -178,37 +274,51 @@ const Shop = () => {
             {/* Mobile Filter Bottom Sheet */}
             {isFilterOpen && (
                 <div className="md:hidden fixed inset-0 z-50">
-                    <div className="absolute inset-0 bg-black/20" onClick={() => setIsFilterOpen(false)} />
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-white rounded-t-3xl p-6 transition-transform">
-                        <div className="w-10 h-1 bg-[#EBEBEB] rounded-full mx-auto mb-4" />
-                        <div className="flex items-center justify-between mb-5">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsFilterOpen(false)} />
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] bg-white rounded-t-3xl p-6 transition-transform animate-slide-up h-[85vh] flex flex-col">
+                        <div className="w-10 h-1 bg-[#EBEBEB] rounded-full mx-auto mb-4 shrink-0" />
+                        <div className="flex items-center justify-between mb-5 shrink-0">
                             <h2 className="font-['Playfair_Display'] text-xl font-medium text-[#343434]">{COPY.shop.filters.title}</h2>
                             <button onClick={() => setIsFilterOpen(false)} className="w-11 h-11 flex items-center justify-center rounded-full active:bg-[#F5F5F5] transition-colors">
-                                {/* Filter close empty or × icon */}
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#343434" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                <Icon name="close" size="w-5 h-5"/>
                             </button>
                         </div>
 
-                        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">{COPY.shop.filters.sortBy}</p>
-                        {/* Fake sort options for visual */}
-                        <div className="flex flex-wrap gap-2 mb-6">
-                            {COPY.shop.sortOptions.slice(0, 3).map(opt => (
-                                <button key={opt} className="px-4 py-2 min-h-[44px] border border-[#EBEBEB] rounded-full font-['DM_Sans'] text-sm text-[#343434] hover:border-[#CA8385] transition-colors">{opt}</button>
-                            ))}
-                        </div>
-
-                        <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">{COPY.shop.filters.priceRange}</p>
-                        {/* Fake slider */}
-                        <div className="w-full h-1 bg-[#EBEBEB] rounded-full relative mb-8 mt-4">
-                            <div className="absolute left-1/4 right-1/4 h-full bg-[#CA8385] rounded-full">
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-white border-2 border-[#CA8385] rounded-full shadow-sm" />
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-6 h-6 bg-white border-2 border-[#CA8385] rounded-full shadow-sm" />
+                        <div className="flex-1 overflow-y-auto hide-scrollbar space-y-8">
+                            <div>
+                                <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">{COPY.shop.filters.sortBy}</p>
+                                <div className="flex flex-col gap-2">
+                                    {COPY.shop.sortOptions.map(opt => (
+                                        <button 
+                                            key={opt} 
+                                            onClick={() => handleParamChange('sort', opt === 'Recommended' ? null : opt)}
+                                            className={`w-full text-left px-5 py-4 rounded-xl border font-['DM_Sans'] text-sm transition-colors ${sortQuery === opt ? 'border-[#CA8385] bg-[#FAF8F7] text-[#CA8385] font-bold' : 'border-[#EBEBEB] text-[#343434]'}`}
+                                        >
+                                            {opt}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <p className="font-['DM_Sans'] text-sm font-bold text-[#343434] mb-3">Minimum Rating</p>
+                                <div className="flex gap-2">
+                                    {[4, 3, 2].map(rating => (
+                                        <button 
+                                            key={rating} 
+                                            onClick={() => handleParamChange('minRating', rating.toString())}
+                                            className={`flex-1 py-3 rounded-xl border font-['DM_Sans'] text-sm transition-colors ${minRating === rating ? 'border-[#CA8385] bg-[#CA8385] text-white font-bold' : 'border-[#EBEBEB] text-[#343434]'}`}
+                                        >
+                                            {rating}★ +
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-3 mt-6">
-                            <button className="flex-1 h-14 border border-[#343434] rounded-full font-['DM_Sans'] font-medium text-[#343434] hover:bg-[#F5F5F5] active:scale-95 transition-all" onClick={() => setIsFilterOpen(false)}>{COPY.shop.filters.reset}</button>
-                            <button className="flex-1 h-14 bg-[#343434] rounded-full font-['DM_Sans'] font-medium text-white hover:bg-black active:scale-95 transition-all outline-none" onClick={() => setIsFilterOpen(false)}>{COPY.shop.filters.apply}</button>
+                        <div className="flex gap-3 mt-6 shrink-0 pt-4 border-t border-[#EBEBEB]">
+                            <button className="flex-1 h-14 border border-[#343434] rounded-full font-['DM_Sans'] font-medium text-[#343434] active:bg-[#F5F5F5] transition-all" onClick={() => { setSearchParams(new URLSearchParams()); setIsFilterOpen(false); }}>{COPY.shop.filters.reset}</button>
+                            <button className="flex-1 h-14 bg-[#343434] rounded-full font-['DM_Sans'] font-medium text-white active:bg-black transition-all" onClick={() => setIsFilterOpen(false)}>{COPY.shop.filters.apply}</button>
                         </div>
                     </div>
                 </div>
