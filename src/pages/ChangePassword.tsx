@@ -31,13 +31,16 @@ const ChangePassword = () => {
     const hasLength = newPassword.length >= 8;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-10 z-0">
-            <div className="px-5 pt-8">
-                <h2 className="font-['DM_Sans'] text-sm text-[#999999] mb-8 leading-relaxed">
+        <div className="min-h-screen bg-[#FAFAFA] flex flex-col pb-10 z-0 items-center">
+            <div className="w-full max-w-[600px] px-5 pt-10 md:pt-16">
+                <h1 className="font-['Playfair_Display'] text-3xl font-bold text-[#343434] mb-2">
+                    Change Password
+                </h1>
+                <h2 className="font-['DM_Sans'] text-sm text-[#999999] mb-10 leading-relaxed">
                     Your new password must be different from previous used passwords.
                 </h2>
 
-                <form onSubmit={handleSave} className="flex flex-col flex-1">
+                <form onSubmit={handleSave} className="flex flex-col flex-1 bg-white p-6 md:p-8 rounded-3xl border border-[#EBEBEB] shadow-sm">
                     {/* Current Password field */}
                     <div className="mb-4">
                         <label className="block text-sm font-medium font-['DM_Sans'] text-[#343434] mb-2">Current Password</label>

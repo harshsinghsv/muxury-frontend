@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import FormField from "@/components/FormField";
 import Input from "@/components/Input";
 import LoadingButton from "@/components/LoadingButton";
 import Icon from "@/components/Icon";
 
 const ForgotPassword = () => {
-    const [email, setEmail] = useState("");
+    const [identifier, setIdentifier] = useState("");
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<{ email?: string }>({});
+    const [errors, setErrors] = useState<{ identifier?: string }>({});
     const navigate = useNavigate();
+    const { resetPassword } = useAuth();
 
     const validateForm = () => {
         const newErrors: typeof errors = {};
-        if (!email) newErrors.email = "Email is required";
-        else if (!/^\S+@\S+\.\S+$/.test(email)) newErrors.email = "Please enter a valid email";
+        if (!identifier) newErrors.identifier = "Email or Phone is required";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -25,9 +26,10 @@ const ForgotPassword = () => {
 
         setLoading(true);
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 500));
-            navigate("/enter-otp");
+            await resetPassword(identifier);
+            navigate(`/verify-otp?purpose=reset&phone=${encodeURIComponent(identifier)}`);
+        } catch (error) {
+            console.error("Failed to reset password:", error);
         } finally {
             setLoading(false);
         }
@@ -68,22 +70,22 @@ const ForgotPassword = () => {
 
                 <form onSubmit={handleNext} className="flex-1 flex flex-col" noValidate>
                     <FormField
-                        label="Email"
-                        error={errors.email}
+                        label="Email or Mobile Number"
+                        error={errors.identifier}
                         required
                     >
                         <Input
-                            type="email"
-                            value={email}
+                            type="text"
+                            value={identifier}
                             onChange={(e) => {
-                                setEmail(e.target.value);
-                                if (errors.email) setErrors({ ...errors, email: undefined });
+                                setIdentifier(e.target.value);
+                                if (errors.identifier) setErrors({ ...errors, identifier: undefined });
                             }}
-                            placeholder="example@gmail.com"
-                            error={!!errors.email}
-                            aria-label="Email address"
+                            placeholder="example@gmail.com or 9876543210"
+                            error={!!errors.identifier}
+                            aria-label="Email or phone"
                             aria-required="true"
-                            aria-invalid={!!errors.email}
+                            aria-invalid={!!errors.identifier}
                         />
                     </FormField>
 

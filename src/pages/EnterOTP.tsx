@@ -17,7 +17,7 @@ const OTP_LENGTH = 6;
 const EnterOTP = () => {
     const [searchParams] = useSearchParams();
     const phone = searchParams.get("phone") || "";
-    const purpose = (searchParams.get("purpose") || "login") as "register" | "login";
+    const purpose = (searchParams.get("purpose") || "login") as "register" | "login" | "reset";
     const next = searchParams.get("next") || "/";
 
     const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
@@ -86,9 +86,14 @@ const EnterOTP = () => {
         }
         setLoading(true);
         try {
-            await verifyOtp(phone, otpStr, purpose);
-            toast.success(purpose === "register" ? "Account verified! Welcome to Muxury." : "Login successful!");
-            navigate(next, { replace: true });
+            if (purpose === "reset") {
+                await new Promise(res => setTimeout(res, 800)); // Mock validation delay
+                navigate(`/create-new-password?identifier=${phone}`, { replace: true });
+            } else {
+                await verifyOtp(phone, otpStr, purpose);
+                toast.success(purpose === "register" ? "Account verified! Welcome to Muxury." : "Login successful!");
+                navigate(next, { replace: true });
+            }
         } catch (err: any) {
             toast.error(err.message || "Invalid OTP. Please try again.");
             // Clear OTP on error

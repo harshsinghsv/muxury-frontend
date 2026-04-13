@@ -16,6 +16,7 @@ import React, {
   useCallback,
 } from 'react';
 import api, { tokenStorage } from '../lib/api';
+import { MOCK_USER } from '@/data/mock';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,8 +44,11 @@ type AuthAction =
 interface AuthContextType extends AuthState {
   register: (data: { phone: string; firstName: string; lastName: string; password: string; email?: string }) => Promise<void>;
   login: (phone: string, password: string) => Promise<void>;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
   verifyOtp: (phone: string, otp: string, purpose: 'register' | 'login') => Promise<void>;
   resendOtp: (phone: string) => Promise<void>;
+  resetPassword: (emailOrPhone: string) => Promise<void>;
+  updateProfile: (data: Partial<User>) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -139,6 +143,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (phone: string, password: string) => {
     dispatch({ type: 'SET_LOADING', payload: true });
+
+    // DEMO BYPASS
+    if (phone === "9999999999" && password === "demo") {
+      setTimeout(() => {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }, 800);
+      return;
+    }
+
     try {
       await api.post('/auth/login', { phone, password });
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -150,10 +163,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const loginWithEmail = useCallback(async (email: string, password: string) => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    
+    // DEMO BYPASS for Email (Bypasses OTP)
+    if (email === "demo@muxury.com" && password === "demo") {
+      setTimeout(() => {
+        dispatch({ type: 'SET_USER', payload: { ...MOCK_USER, email } });
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }, 800);
+      return;
+    }
+
+    try {
+      const { data } = await api.post('/auth/login-email', { email, password });
+      const { user, accessToken, refreshToken } = data.data;
+      tokenStorage.setTokens(accessToken, refreshToken);
+      clearGuestSession();
+      dispatch({ type: 'SET_USER', payload: user });
+    } catch (err: any) {
+      dispatch({ type: 'SET_LOADING', payload: false });
+      throw new Error(err?.response?.data?.message || 'Invalid email or password.');
+    }
+  }, []);
+
   // ─── Verify OTP ─────────────────────────────────────────────────────────────
 
   const verifyOtp = useCallback(async (phone: string, otp: string, purpose: 'register' | 'login') => {
     dispatch({ type: 'SET_LOADING', payload: true });
+
+    // DEMO BYPASS
+    if (phone === "9999999999" && otp === "123456") {
+      setTimeout(() => {
+        dispatch({ type: 'SET_USER', payload: { ...MOCK_USER, phone: "9999999999" } });
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }, 800);
+      return;
+    }
+
     try {
       const guestSessionId = getGuestSessionId();
       const { data } = await api.post('/auth/verify-otp', {
@@ -169,6 +216,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       dispatch({ type: 'SET_LOADING', payload: false });
       throw new Error(err?.response?.data?.message || 'Verification failed. Please try again.');
+    }
+  }, []);
+
+  // ─── Reset Password ─────────────────────────────────────────────────────────
+
+  const resetPassword = useCallback(async (emailOrPhone: string) => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      await new Promise(res => setTimeout(res, 1000)); // Mock API delay
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (err: any) {
+      dispatch({ type: 'SET_LOADING', payload: false });
+      throw new Error('Failed to send reset link.');
     }
   }, []);
 
@@ -196,8 +256,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // ─── Update Profile ─────────────────────────────────────────────────────────
+
+  const updateProfile = useCallback(async (data: Partial<User>) => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      await new Promise(res => setTimeout(res, 800)); // Mock API delay
+      dispatch({ type: 'SET_USER', payload: { ...state.user!, ...data } });
+    } catch (err: any) {
+      dispatch({ type: 'SET_LOADING', payload: false });
+      throw new Error('Failed to update profile.');
+    }
+  }, [state.user]);
+
   return (
-    <AuthContext.Provider value={{ ...state, register, login, verifyOtp, resendOtp, logout }}>
+    <AuthContext.Provider value={{ ...state, register, login, loginWithEmail, verifyOtp, resendOtp, resetPassword, updateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );
